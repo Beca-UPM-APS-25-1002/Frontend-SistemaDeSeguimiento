@@ -7,7 +7,9 @@ declare global {
         id: int;
         email: string;
         nombre: string;
+        is_admin: boolean;
       } | null;
+    }
     // interface Error {}
     // interface Locals {}
     // interface PageData {}
