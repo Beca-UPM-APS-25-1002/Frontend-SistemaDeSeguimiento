@@ -21,6 +21,7 @@
     <form
       method="POST"
       class="flex flex-col gap-2 w-full max-w-xs mx-auto"
+      action="?/login"
       use:enhance
     >
       <label class="input input-bordered w-full validator">

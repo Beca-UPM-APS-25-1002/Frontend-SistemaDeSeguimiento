@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions = {
-  default: async ({ cookies, request, url }) => {
+  login: async ({ cookies, request, url }) => {
     //Validate loginForm
     const data = Object.fromEntries((await request.formData()).entries());
     const loginForm = LoginSchema(data);
@@ -58,5 +58,21 @@ export const actions = {
     }
     // Redirect to the home page or a specified redirect URL
     throw redirect(302, url.searchParams.get("redirectTo") ?? "/seguimientos");
+  },
+  logout: async ({ cookies, request, url }) => {
+    const token = cookies.get("authToken");
+
+    const response = await fetch(API_URI + "/auth/token/logout/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Token " + token,
+      },
+    });
+    if (!response.ok) {
+      console.error(response.body);
+    }
+    cookies.delete("authToken", { path: "/" });
+    throw redirect(303, "/");
   },
 } satisfies Actions;

@@ -1,1 +1,5 @@
-// TODO: Action to make a logout
+import type { LayoutServerLoad } from "./$types.ts";
+
+export const load: LayoutServerLoad = async ({ locals, url }) => {
+  return { user: locals.user };
+};
