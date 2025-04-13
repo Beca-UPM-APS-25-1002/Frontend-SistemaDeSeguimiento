@@ -41,7 +41,8 @@ export const actions = {
       console.error("Register error:", error);
       return fail(500, { error: { all: "No se pudo conectar al servidor" } });
     }
-    //Redirect con email
+    //Redirect with email, deletes cookie in case an account was already logged on
+    cookies.delete("authToken", { path: "/" });
     throw redirect(302, "/?email=" + registerForm.email);
   },
 } satisfies Actions;

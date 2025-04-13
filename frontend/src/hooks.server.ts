@@ -17,20 +17,19 @@ export const handle: Handle = async ({ event, resolve }) => {
    */
   const token = event.cookies.get("authToken");
 
-  // If in login do nothing
-  if (event.url.pathname == "/") {
-    const response = await resolve(event);
-    return response;
-  }
-
   // If no authToken is found then go to login
-  if (!token) {
+  if (
+    !token &&
+    event.url.pathname != "/" &&
+    event.url.pathname != "/register"
+  ) {
     const redirectPath = "/?redirectTo=" + event.url.pathname;
     throw redirect(302, redirectPath);
+  } else if (token) {
+    await setLocalUser();
   }
 
-  await setLocalUser();
-
+  console.log(event.locals);
   const response = await resolve(event);
 
   return response;

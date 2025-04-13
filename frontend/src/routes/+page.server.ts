@@ -10,6 +10,7 @@ const LoginSchema = type({
 });
 
 export const load: PageServerLoad = async ({ locals, url }) => {
+  console.log(locals);
   if (locals.user) {
     throw redirect(302, "/seguimientos");
   }
