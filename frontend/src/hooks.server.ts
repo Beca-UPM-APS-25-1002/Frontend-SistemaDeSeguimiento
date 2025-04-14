@@ -1,14 +1,6 @@
 import { redirect, type Handle, type HandleFetch } from "@sveltejs/kit";
 import { API_URI } from "$env/static/private";
 
-interface APIUser {
-  id: number;
-  nombre: string;
-  email: string;
-  activo: boolean;
-  is_admin: boolean;
-}
-
 export const handle: Handle = async ({ event, resolve }) => {
   /**
    * This section checks validity of authorization
@@ -27,6 +19,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw redirect(302, redirectPath);
   } else if (token) {
     await setLocalUser();
+    await setLocalCurrentYear();
   }
 
   console.log(event.locals);
@@ -38,6 +31,13 @@ export const handle: Handle = async ({ event, resolve }) => {
    * Sets the locals.user to the current user or redirects to login if not valid
    */
   async function setLocalUser() {
+    interface APIUser {
+      id: number;
+      nombre: string;
+      email: string;
+      activo: boolean;
+      is_admin: boolean;
+    }
     const userRequest = await fetch(API_URI + "/auth/users/me/", {
       method: "GET",
       headers: {
@@ -58,12 +58,31 @@ export const handle: Handle = async ({ event, resolve }) => {
       is_admin: user.is_admin,
     };
   }
+  /**
+   * Sets the locals.current_year to the current year
+   */
+  async function setLocalCurrentYear() {
+    interface CurrentYear {
+      año_academico_actual: string;
+    }
+    const yearRequest = await fetch(API_URI + "/api/year-actual/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Token " + token,
+      },
+    });
+    const year: CurrentYear = await yearRequest.json();
+    event.locals.current_year = year.año_academico_actual;
+  }
 };
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+  console.log("fetchign");
   const token = event.cookies.get("authToken");
   if (token && request.url.startsWith(API_URI)) {
     request.headers.set("Authorization", "Token " + token);
   }
+  console.log(request.headers);
   return fetch(request);
 };

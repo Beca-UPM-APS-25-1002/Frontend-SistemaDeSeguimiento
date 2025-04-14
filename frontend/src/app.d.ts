@@ -9,6 +9,7 @@ declare global {
         nombre: string;
         is_admin: boolean;
       } | null;
+      current_year: string | null;
     }
     // interface Error {}
     // interface Locals {}

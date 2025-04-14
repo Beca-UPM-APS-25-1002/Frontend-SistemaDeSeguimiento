@@ -1,6 +1,8 @@
 <script lang="ts">
-  import type { Docencia } from "$lib/interfaces.ts";
-  import { onMount } from "svelte";
+  import type {
+    Docencia,
+    SeguimientosFaltantesPorMes,
+  } from "$lib/interfaces.ts";
   import { fade, slide } from "svelte/transition";
   import Fa from "svelte-fa";
   import {
@@ -30,23 +32,34 @@
   ];
 
   // Default to current month
-  let selectedMonth = $state(months[new Date().getMonth()]);
+  let selectedMonth = $state(new Date().getMonth());
+  $inspect(selectedMonth);
+
   const {
-    docencias = [],
-    seguimientosFaltantes = [],
-  }: { docencias: Docencia[]; seguimientosFaltantes: number[] } = $props();
+    docencias,
+    seguimientosFaltantes,
+  }: {
+    docencias: Promise<Docencia[]>;
+    seguimientosFaltantes: Promise<SeguimientosFaltantesPorMes>;
+  } = $props();
 
   let searchQuery = $state("");
   let filteredDocencias = $state<Docencia[]>([]);
   let expandedView = $state(false);
+  let resolvedDocencias = $state<Docencia[]>([]);
+
+  docencias.then((result) => {
+    resolvedDocencias = result;
+    console.log(resolvedDocencias);
+  });
 
   // Computed property for filtered docencias
   $effect(() => {
     if (!searchQuery.trim()) {
-      filteredDocencias = docencias;
+      filteredDocencias = resolvedDocencias;
     } else {
       const query = searchQuery.toLowerCase();
-      filteredDocencias = docencias.filter(
+      filteredDocencias = resolvedDocencias.filter(
         (doc) =>
           doc.modulo.nombre.toLowerCase().includes(query) ||
           doc.grupo.nombre.toLowerCase().includes(query)
@@ -55,8 +68,15 @@
   });
 
   // Function to check if seguimiento is completed
-  function isSeguimientoCompleted(docenciaId: number): boolean {
-    return !seguimientosFaltantes.includes(docenciaId);
+  function isSeguimientoCompleted(
+    docenciaId: number,
+    month: number,
+    seguimientosFaltantes: SeguimientosFaltantesPorMes
+  ): boolean {
+    return (
+      seguimientosFaltantes[month + 1] &&
+      !seguimientosFaltantes[month + 1].includes(docenciaId)
+    );
   }
 
   function toggleView() {
@@ -93,8 +113,8 @@
     <!-- Month selector -->
     <div class="w-full mt-2">
       <select class="select select-bordered w-full" bind:value={selectedMonth}>
-        {#each months as month}
-          <option value={month}>{month}</option>
+        {#each months as month, index}
+          <option value={index}>{month}</option>
         {/each}
       </select>
     </div>
@@ -117,63 +137,74 @@
   </div>
 
   <div class="divider divider-accent italic text-xs">Selecciona docencia</div>
-
-  <!-- Docencias list -->
-  <div class="px-2 overflow-y-auto flex-grow">
-    {#if filteredDocencias.length === 0}
-      <div class="text-center py-4 text-neutral-500" transition:fade|local>
-        {searchQuery
-          ? "No se encontraron docencias que coincidan con tu búsqueda"
-          : "No hay docencias disponibles"}
-      </div>
-    {:else}
-      <div class="divide-y divide-accent">
-        {#each filteredDocencias as docencia, i (docencia.id)}
-          <div transition:fade|local={{ delay: i * 50, duration: 200 }}>
-            <div class="m-1 flex items-center">
-              <a
-                class="w-full text-left hover:bg-base-200 transition-all rounded-lg flex items-center p-2"
-                href="/seguimientos/{selectedMonth}/{docencia.id}"
-              >
-                <div class="mr-3">
-                  {#if isSeguimientoCompleted(docencia.id)}
-                    <Fa icon={faCheckCircle} class="text-success" />
-                  {:else}
-                    <Fa icon={faTimesCircle} class="text-error" />
-                  {/if}
-                </div>
-
-                <div class="flex-grow">
-                  <h3 class="font-medium text-lg">
-                    {docencia.modulo.nombre}
-                  </h3>
-                  <div class="mt-1">
-                    <span
-                      class="inline-block p-1 text-sm border border-accent rounded-full"
-                      >{docencia.grupo.nombre}</span
-                    >
-                  </div>
-                </div>
-              </a>
-              <div class="ml-2">
+  {#await docencias}
+    <div class="px-2 overflow-y-auto flex-grow">
+      <span class="loading loading-spinner text-primary"></span>
+    </div>
+  {:then docencias}
+    <!-- Docencias list -->
+    <div class="px-2 overflow-y-auto flex-grow">
+      {#if filteredDocencias.length === 0}
+        <div class="text-center py-4 text-neutral-500" transition:fade|local>
+          {searchQuery
+            ? "No se encontraron docencias que coincidan con tu búsqueda"
+            : "No hay docencias disponibles"}
+        </div>
+      {:else}
+        <div class="divide-y divide-accent">
+          {#each filteredDocencias as docencia, i (docencia.id)}
+            <div transition:fade|local={{ delay: i * 50, duration: 200 }}>
+              <div class="m-1 flex items-center">
                 <a
-                  class="btn btn-sm btn-ghost"
-                  href="/seguimientos/tabla/{docencia.id}"
-                  aria-label="Ver en tabla"
+                  class="w-full text-left hover:bg-base-200 transition-all rounded-lg flex items-center p-2"
+                  href="/seguimientos/{selectedMonth}/{docencia.id}"
                 >
-                  <Fa icon={faTable} />
+                  {#await seguimientosFaltantes}
+                    <div class="mr-3">
+                      <span class="loading loading-spinner text-primary"></span>
+                    </div>
+                  {:then seguimientosFaltantesResolved}
+                    <div class="mr-3">
+                      {#if isSeguimientoCompleted(docencia.id, selectedMonth, seguimientosFaltantesResolved)}
+                        <Fa icon={faCheckCircle} class="text-success" />
+                      {:else}
+                        <Fa icon={faTimesCircle} class="text-error" />
+                      {/if}
+                    </div>
+                  {/await}
+
+                  <div class="flex-grow">
+                    <h3 class="font-medium text-lg">
+                      {docencia.modulo.nombre}
+                    </h3>
+                    <div class="mt-1">
+                      <span
+                        class="inline-block p-1 text-sm border border-accent rounded-full"
+                        >{docencia.grupo.nombre}</span
+                      >
+                    </div>
+                  </div>
                 </a>
+                <div class="ml-2">
+                  <a
+                    class="btn btn-sm btn-ghost"
+                    href="/seguimientos/tabla/{docencia.id}"
+                    aria-label="Ver en tabla"
+                  >
+                    <Fa icon={faTable} />
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
 
-  <!-- Footer with count -->
-  <div class="p-2 text-xs text-center text-neutral-500 rounded-b bg-base-200">
-    {filteredDocencias.length}
-    {filteredDocencias.length === 1 ? "docencia" : "docencias"} encontradas
-  </div>
+    <!-- Footer with count -->
+    <div class="p-2 text-xs text-center text-neutral-500 rounded-b bg-base-200">
+      {filteredDocencias.length}
+      {filteredDocencias.length === 1 ? "docencia" : "docencias"} encontradas
+    </div>
+  {/await}
 </div>

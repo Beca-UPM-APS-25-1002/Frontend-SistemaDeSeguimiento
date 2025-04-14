@@ -32,3 +32,15 @@ export interface Docencia {
   modulo: Modulo;
   grupo: Grupo;
 }
+
+export interface SeguimientosFaltantesPorMes {
+  [mes: number]: number[];
+}
+
+export interface FetchSvelteKit {
+  (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+  (
+    input: string | URL | globalThis.Request,
+    init?: RequestInit
+  ): Promise<Response>;
+}
