@@ -6,15 +6,13 @@
   import { fade, slide } from "svelte/transition";
   import Fa from "svelte-fa";
   import {
-    faCheckCircle,
-    faTimesCircle,
     faTable,
     faSearch,
-    faSearchPlus,
-    faSearchMinus,
-    faCross,
     faClose,
+    faCheckSquare,
+    faSquare,
   } from "@fortawesome/free-solid-svg-icons";
+  import { page } from "$app/state";
 
   const months = [
     "Enero",
@@ -38,9 +36,13 @@
   const {
     docencias,
     seguimientosFaltantes,
+    docenciaActual = -1,
+    mesActual = -1,
   }: {
     docencias: Promise<Docencia[]>;
     seguimientosFaltantes: Promise<SeguimientosFaltantesPorMes>;
+    docenciaActual: number;
+    mesActual: number;
   } = $props();
 
   let searchQuery = $state("");
@@ -49,8 +51,17 @@
   let resolvedDocencias = $state<Docencia[]>([]);
 
   docencias.then((result) => {
-    resolvedDocencias = result;
-    console.log(resolvedDocencias);
+    resolvedDocencias = result.sort((a, b) => {
+      // First sort by group name
+      const groupNameComparison = a.grupo.nombre.localeCompare(b.grupo.nombre);
+
+      // If group names are the same, sort by module name
+      if (groupNameComparison === 0) {
+        return a.modulo.nombre.localeCompare(b.modulo.nombre);
+      }
+
+      return groupNameComparison;
+    });
   });
 
   // Computed property for filtered docencias
@@ -73,8 +84,10 @@
     month: number,
     seguimientosFaltantes: SeguimientosFaltantesPorMes
   ): boolean {
+    console.log("hello");
+    console.log(seguimientosFaltantes);
     return (
-      seguimientosFaltantes[month + 1] &&
+      !seguimientosFaltantes[month + 1] ||
       !seguimientosFaltantes[month + 1].includes(docenciaId)
     );
   }
@@ -85,7 +98,8 @@
 </script>
 
 <div
-  class="sm:w-1/4 w-full h-full m-4 rounded-lg bg-base-100 shadow-lg flex flex-col transition-all duration-300"
+  class="sm:w-full md:w-1/4 h-full m-4 rounded-lg bg-base-100 shadow-lg flex flex-col transition-all duration-300
+  {page.url.pathname !== '/seguimientos' ? 'hidden md:block' : ''}"
 >
   <!-- Header section -->
   <div class="p-4 text-base-content">
@@ -138,8 +152,8 @@
 
   <div class="divider divider-accent italic text-xs">Selecciona docencia</div>
   {#await docencias}
-    <div class="px-2 overflow-y-auto flex-grow">
-      <span class="loading loading-spinner text-primary"></span>
+    <div class="px-2 overflow-y-auto flex-grow h-full flex justify-center">
+      <span class="loading loading-spinner text-accent"></span>
     </div>
   {:then docencias}
     <!-- Docencias list -->
@@ -156,21 +170,26 @@
             <div transition:fade|local={{ delay: i * 50, duration: 200 }}>
               <div class="m-1 flex items-center">
                 <a
-                  class="w-full text-left hover:bg-base-200 transition-all rounded-lg flex items-center p-2"
+                  class="w-full text-left hover:bg-base-200 transition-all rounded-lg flex items-center p-2 {docencia.id ==
+                    docenciaActual && selectedMonth == mesActual
+                    ? 'bg-base-300'
+                    : ''}"
                   href="/seguimientos/{selectedMonth}/{docencia.id}"
                 >
                   {#await seguimientosFaltantes}
                     <div class="mr-3">
-                      <span class="loading loading-spinner text-primary"></span>
+                      <span class="loading loading-spinner text-accent"></span>
                     </div>
                   {:then seguimientosFaltantesResolved}
-                    <div class="mr-3">
-                      {#if isSeguimientoCompleted(docencia.id, selectedMonth, seguimientosFaltantesResolved)}
-                        <Fa icon={faCheckCircle} class="text-success" />
-                      {:else}
-                        <Fa icon={faTimesCircle} class="text-error" />
-                      {/if}
-                    </div>
+                    {#key selectedMonth}
+                      <div class="mr-3">
+                        {#if isSeguimientoCompleted(docencia.id, selectedMonth, seguimientosFaltantesResolved)}
+                          <Fa icon={faCheckSquare} class="text-success" />
+                        {:else}
+                          <Fa icon={faSquare} class="text-neutral" />
+                        {/if}
+                      </div>
+                    {/key}
                   {/await}
 
                   <div class="flex-grow">

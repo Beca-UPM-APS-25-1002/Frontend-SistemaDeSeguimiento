@@ -21,7 +21,7 @@ async function getDocenciasAPI(fetch: FetchSvelteKit): Promise<Docencia[]> {
     const response = await fetch(API_URI + "/api/docencias/", {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
+        "Content-": "application/json",
       },
     });
     const data = (await response.json()) as Docencia[];
@@ -44,7 +44,7 @@ async function getSeguimientosFaltantesAño(
       {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
+          "Content-": "application/json",
         },
       }
     );
