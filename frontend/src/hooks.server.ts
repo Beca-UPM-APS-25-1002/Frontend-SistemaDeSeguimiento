@@ -22,7 +22,6 @@ export const handle: Handle = async ({ event, resolve }) => {
     await setLocalCurrentYear();
   }
 
-  console.log(event.locals);
   const response = await resolve(event);
 
   return response;
@@ -78,11 +77,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
-  console.log("fetchign");
   const token = event.cookies.get("authToken");
   if (token && request.url.startsWith(API_URI)) {
     request.headers.set("Authorization", "Token " + token);
   }
-  console.log(request.headers);
   return fetch(request);
 };

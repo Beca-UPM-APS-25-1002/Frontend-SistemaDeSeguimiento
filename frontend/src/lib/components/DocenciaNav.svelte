@@ -31,7 +31,6 @@
 
   // Default to current month
   let selectedMonth = $state(new Date().getMonth());
-  $inspect(selectedMonth);
 
   const {
     docencias,
@@ -84,8 +83,6 @@
     month: number,
     seguimientosFaltantes: SeguimientosFaltantesPorMes
   ): boolean {
-    console.log("hello");
-    console.log(seguimientosFaltantes);
     return (
       !seguimientosFaltantes[month + 1] ||
       !seguimientosFaltantes[month + 1].includes(docenciaId)
@@ -157,7 +154,7 @@
     </div>
   {:then docencias}
     <!-- Docencias list -->
-    <div class="px-2 overflow-y-auto flex-grow">
+    <div class="px-2 overflow-y-auto">
       {#if filteredDocencias.length === 0}
         <div class="text-center py-4 text-neutral-500" transition:fade|local>
           {searchQuery
@@ -182,7 +179,7 @@
                     </div>
                   {:then seguimientosFaltantesResolved}
                     {#key selectedMonth}
-                      <div class="mr-3">
+                      <div class="mr-3 text-xl">
                         {#if isSeguimientoCompleted(docencia.id, selectedMonth, seguimientosFaltantesResolved)}
                           <Fa icon={faCheckSquare} class="text-success" />
                         {:else}
@@ -204,15 +201,6 @@
                     </div>
                   </div>
                 </a>
-                <div class="ml-2">
-                  <a
-                    class="btn btn-sm btn-ghost"
-                    href="/seguimientos/tabla/{docencia.id}"
-                    aria-label="Ver en tabla"
-                  >
-                    <Fa icon={faTable} />
-                  </a>
-                </div>
               </div>
             </div>
           {/each}

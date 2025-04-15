@@ -1,1 +1,3 @@
-<h1 class="text-2xl font-semibold">Selecciona un seguimiento a realizar</h1>
+<h1 class="text-xl font-semibold text-center">
+  Selecciona una docencia para acceder al seguimiento
+</h1>

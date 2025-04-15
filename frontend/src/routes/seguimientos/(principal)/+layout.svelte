@@ -16,7 +16,7 @@
 
   <!-- Content area - Always visible on desktop, only on subpages for mobile -->
   <div
-    class={`flex-grow sm:w-full md:w-3/4 h-full m-4 rounded-lg bg-base-100 shadow-lg p-4 transition-all duration-300
+    class={`flex-grow sm:w-full md:w-3/4 m-4 rounded-lg bg-base-100 shadow-lg p-4 transition-all duration-300
     ${page.url.pathname === "/seguimientos" ? "hidden md:block" : ""}`}
   >
     {@render children()}

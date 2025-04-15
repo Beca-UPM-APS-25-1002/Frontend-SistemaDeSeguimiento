@@ -33,6 +33,22 @@ export interface Docencia {
   grupo: Grupo;
 }
 
+export interface Seguimiento {
+  id: number;
+  profesor: Profesor;
+  modulo: Modulo;
+  grupo: Grupo;
+  ultimo_contenido_impartido: string;
+  estado: string;
+  justificacion_estado: string;
+  cumple_programacion: boolean;
+  justificacion_cumple_programacion: string;
+  mes: number;
+  evaluacion: string;
+  temario_actual: number;
+  docencia: number;
+}
+
 export interface SeguimientosFaltantesPorMes {
   [mes: number]: number[];
 }
