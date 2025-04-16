@@ -18,6 +18,12 @@ interface Modulo {
   nombre: string;
   curso: number;
 }
+export interface UnidadDeTrabajo {
+  id: number;
+  numero_tema: number;
+  titulo: string;
+  modulo: number;
+}
 
 interface Grupo {
   id: number;

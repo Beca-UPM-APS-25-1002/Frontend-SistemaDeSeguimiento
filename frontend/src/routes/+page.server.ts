@@ -27,7 +27,7 @@ export const actions = {
 
     try {
       // Send request for login
-      const response = await fetch(API_URI + "/auth/token/login", {
+      const response = await fetch(`${API_URI}/auth/token/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export const actions = {
   logout: async ({ cookies, request, url }) => {
     const token = cookies.get("authToken");
 
-    const response = await fetch(API_URI + "/auth/token/logout/", {
+    const response = await fetch(`${API_URI}/auth/token/logout/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export const actions = {
       },
     });
     if (!response.ok) {
-      console.error(response.body);
+      console.error("Logout error:", response.body);
     }
     cookies.delete("authToken", { path: "/" });
     throw redirect(303, "/");

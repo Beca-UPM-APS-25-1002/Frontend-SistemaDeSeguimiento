@@ -37,7 +37,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       activo: boolean;
       is_admin: boolean;
     }
-    const userRequest = await fetch(API_URI + "/auth/users/me/", {
+    const userRequest = await fetch(`${API_URI}/auth/users/me/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

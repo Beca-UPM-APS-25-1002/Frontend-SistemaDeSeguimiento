@@ -26,7 +26,8 @@ async function getDocenciasAPI(fetch: FetchSvelteKit): Promise<Docencia[]> {
     });
     const data = (await response.json()) as Docencia[];
     return data;
-  } catch {
+  } catch (error) {
+    console.error("Docencias error:" + error);
     return [];
   }
 }
@@ -40,7 +41,7 @@ async function getSeguimientosFaltantesAño(
   }
   try {
     const response = await fetch(
-      API_URI + "/api/seguimientos-faltantes-anual/" + year + "/",
+      `${API_URI}/api/seguimientos-faltantes-anual/${year}/`,
       {
         method: "GET",
         headers: {
@@ -50,7 +51,8 @@ async function getSeguimientosFaltantesAño(
     );
     const data = (await response.json()) as SeguimientosFaltantesPorMes;
     return data;
-  } catch {
+  } catch (error) {
+    console.error("Seguimientos faltantes error:", error);
     return {};
   }
 }
