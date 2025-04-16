@@ -123,7 +123,11 @@
 
     <!-- Month selector -->
     <div class="w-full mt-2">
-      <select class="select select-bordered w-full" bind:value={selectedMonth}>
+      <select
+        class="select select-bordered w-full"
+        name="month_selector"
+        bind:value={selectedMonth}
+      >
         {#each months as month, index}
           <option value={index}>{month}</option>
         {/each}

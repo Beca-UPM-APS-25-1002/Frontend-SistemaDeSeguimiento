@@ -4,7 +4,9 @@ import type {
   Seguimiento,
   UnidadDeTrabajo,
 } from "$lib/interfaces.js";
-import type { PageServerLoad } from "./$types.js";
+import { type } from "arktype";
+import type { Actions, PageServerLoad } from "./$types.js";
+import { error, fail } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {
@@ -16,6 +18,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
       fetchSeguimientos(fetch, month),
       fetchDocencia(fetch, docenciaId),
     ]);
+    if (!docenciaResponse.ok) {
+      error(404, {
+        message: "Not found",
+      });
+    }
 
     const seguimientos = (await seguimientosResponse.json()) as Seguimiento[];
     const docencia = (await docenciaResponse.json()) as Docencia;
@@ -47,8 +54,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
       seguimientoAnterior,
       unidadesDeTrabajo,
     };
-  } catch (error) {
-    console.log("Load seguimiento: " + error);
+  } catch (err: any) {
+    if (err.status && err.status === 404) {
+      error(404, {
+        message: "Not found",
+      });
+    }
+    console.log("Load seguimiento: " + err);
     return {
       seguimientoActual: undefined,
       seguimientoAnterior: undefined,
@@ -61,7 +73,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
  * Fetches seguimientos for the specified month
  */
 async function fetchSeguimientos(fetch: Function, month: number) {
-  return fetch(`${API_URI}/api/seguimientos/?mes=${month}`, {
+  return fetch(`${API_URI}/api/seguimientos/`, {
     method: "GET",
     headers: {
       "Content-": "application/json",
@@ -129,7 +141,7 @@ function determineSeguimientos(
   if (sortedSeguimientos.length === 1) {
     if (sortedSeguimientos[0].mes === month) {
       seguimientoActual = sortedSeguimientos[0];
-    } else {
+    } else if (sortedSeguimientos[0].mes < month) {
       seguimientoAnterior = sortedSeguimientos[0];
     }
     return { seguimientoActual, seguimientoAnterior };
@@ -145,3 +157,47 @@ function determineSeguimientos(
 
   return { seguimientoActual, seguimientoAnterior };
 }
+
+const SeguimientoSchema = type({
+  "id?": "string",
+  ultimo_contenido_impartido: "string",
+  estado: "'AL_DIA'|'RETRASADO'|'ADELANTADO'",
+  "justificacion_estado?": "string",
+  cumple_programacion: type("string").pipe((value) => value === "on"),
+  "justificacion_cumple_programacion?": "string",
+  mes: type("string")
+    .pipe((value) => Number(value))
+    .pipe(type("number > 0").pipe(type("number <= 12"))),
+  evaluacion: "'PRIMERA'|'TERCERA'|'SEGUNDA'",
+  temario_actual: "string",
+  docencia: "string",
+});
+
+export const actions: Actions = {
+  new: async ({ cookies, request, url, fetch }) => {
+    const data = Object.fromEntries((await request.formData()).entries());
+    const seguimientoData = SeguimientoSchema(data);
+    if (seguimientoData instanceof type.errors) {
+      // Esto no debería ocurrir
+      console.error(seguimientoData.summary);
+      return fail(400, { error: "Error de validación" });
+    }
+    try {
+      const response = await fetch(`${API_URI}/api/seguimientos/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(seguimientoData),
+      });
+      if (!response.ok) {
+        console.log(response);
+        return fail(response.status, { error: await response.json() });
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("Seguimiento submission error:", error);
+      return fail(500, { error: "No se pudo conectar al servidor" });
+    }
+  },
+};
