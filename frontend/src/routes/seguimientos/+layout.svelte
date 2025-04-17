@@ -1,0 +1,56 @@
+<script lang="ts">
+  import {
+    faArrowRightFromBracket,
+    faEnvelope,
+    faGear,
+    faHouse,
+  } from "@fortawesome/free-solid-svg-icons";
+  import Fa from "svelte-fa";
+  import type { LayoutProps } from "./$types.ts";
+  let { data, children }: LayoutProps = $props();
+</script>
+
+<div class="min-h-screen bg-base-200">
+  <div class="navbar bg-base-100 shadow-md">
+    <div class="navbar-start">
+      <a
+        class="btn btn-ghost text-xl"
+        aria-label="homescreen"
+        title="Pantalla Principal"
+        href="/seguimientos"
+      >
+        <Fa icon={faHouse}></Fa>
+      </a>
+      {#if data.user?.is_admin}
+        <a
+          class="btn btn-ghost text-xl"
+          title="Recordatorios de seguimientos"
+          href="/seguimientos/recordatorios"
+        >
+          <Fa icon={faEnvelope}></Fa>
+        </a>
+        <a
+          class="btn btn-ghost text-xl"
+          title="Administración"
+          href="http://localhost:8000/admin"
+        >
+          <Fa icon={faGear}></Fa>
+        </a>
+      {/if}
+    </div>
+    <div class="flex-row flex gap-2 navbar-end">
+      <p class="text-xs ml-2">Bienvenid@ <br /> {data.user?.nombre}</p>
+
+      <form method="POST" action="/?/logout">
+        <button
+          class="btn btn-square btn-ghost"
+          title="Cerrar Sesión"
+          aria-label="Logout"
+        >
+          <Fa class="text-xl" icon={faArrowRightFromBracket}></Fa>
+        </button>
+      </form>
+    </div>
+  </div>
+  {@render children()}
+</div>

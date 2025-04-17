@@ -2,12 +2,12 @@
 @plugin "daisyui";
 
 @plugin "daisyui/theme" {
-  name: "school-paper";
-  default: false;
-  prefersdark: false;
+  name: "school";
+  default: true;
+  prefersdark: true;
   color-scheme: "light";
-  --color-base-100: oklch(98% 0.016 73.684);
-  --color-base-200: oklch(95% 0.038 75.164);
+  --color-base-100: oklch(95% 0.038 75.164);
+  --color-base-200: oklch(90% 0.076 70.697);
   --color-base-300: oklch(83% 0.128 66.29);
   --color-base-content: oklch(35.519% 0.032 262.988);
   --color-primary: oklch(76.662% 0.135 153.45);
@@ -22,7 +22,7 @@
   --color-info-content: oklch(0% 0 0);
   --color-success: oklch(64.8% 0.15 160);
   --color-success-content: oklch(0% 0 0);
-  --color-warning: oklch(84.71% 0.199 83.87);
+  --color-warning: oklch(70% 0.213 47.604);
   --color-warning-content: oklch(0% 0 0);
   --color-error: oklch(71.76% 0.221 22.18);
   --color-error-content: oklch(0% 0 0);
