@@ -42,17 +42,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
       filteredSeguimientos,
       month
     );
-    console.log("-------ACTUAL-------");
-    console.log(seguimientoActual);
-    console.log("------ANTERIOR--------");
-    console.log(seguimientoAnterior);
-    console.log("------TEMARIO--------");
-    console.log(unidadesDeTrabajo);
-    console.log("----------------------");
     return {
       seguimientoActual,
       seguimientoAnterior,
       unidadesDeTrabajo,
+      docencia,
     };
   } catch (err: any) {
     if (err.status && err.status === 404) {
@@ -65,6 +59,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
       seguimientoActual: undefined,
       seguimientoAnterior: undefined,
       unidadesDeTrabajo: [],
+      docencia: undefined,
     };
   }
 };
@@ -121,7 +116,7 @@ function filterAndSortSeguimientos(
         (seguimiento.grupo.id === docencia.grupo.id &&
           seguimiento.modulo.id === docencia.modulo.id)
     )
-    .toSorted((a, b) => b.mes - a.mes);
+    .toSorted((a, b) => a.mes - b.mes);
 }
 
 /**
@@ -135,10 +130,12 @@ function determineSeguimientos(
   let seguimientoAnterior: Seguimiento | undefined = undefined;
 
   if (sortedSeguimientos.length === 0) {
+    console.log("Nothing");
     return { seguimientoActual, seguimientoAnterior };
   }
 
   if (sortedSeguimientos.length === 1) {
+    console.log(sortedSeguimientos[0].mes + " - " + month);
     if (sortedSeguimientos[0].mes === month) {
       seguimientoActual = sortedSeguimientos[0];
     } else if (sortedSeguimientos[0].mes < month) {
@@ -151,7 +148,7 @@ function determineSeguimientos(
   if (sortedSeguimientos[0].mes === month) {
     seguimientoActual = sortedSeguimientos[0];
     seguimientoAnterior = sortedSeguimientos[1];
-  } else {
+  } else if (sortedSeguimientos[0].mes < month) {
     seguimientoAnterior = sortedSeguimientos[0];
   }
 
@@ -161,9 +158,12 @@ function determineSeguimientos(
 const SeguimientoSchema = type({
   "id?": "string",
   ultimo_contenido_impartido: "string",
-  estado: "'AL_DIA'|'RETRASADO'|'ADELANTADO'",
+  estado: "'AL_DIA'|'ATRASADO'|'ADELANTADO'",
   "justificacion_estado?": "string",
-  cumple_programacion: type("string").pipe((value) => value === "on"),
+  cumple_programacion: type("string")
+    .pipe((value) => value === "on")
+    .pipe(type("boolean"))
+    .default(""),
   "justificacion_cumple_programacion?": "string",
   mes: type("string")
     .pipe((value) => Number(value))
@@ -174,7 +174,7 @@ const SeguimientoSchema = type({
 });
 
 export const actions: Actions = {
-  new: async ({ cookies, request, url, fetch }) => {
+  new: async ({ request, fetch }) => {
     const data = Object.fromEntries((await request.formData()).entries());
     const seguimientoData = SeguimientoSchema(data);
     if (seguimientoData instanceof type.errors) {
@@ -191,8 +191,43 @@ export const actions: Actions = {
         body: JSON.stringify(seguimientoData),
       });
       if (!response.ok) {
-        console.log(response);
-        return fail(response.status, { error: await response.json() });
+        console.error(response);
+        return fail(response.status, {
+          error: (await response.json()).detail,
+        });
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("Seguimiento submission error:", error);
+      return fail(500, { error: "No se pudo conectar al servidor" });
+    }
+  },
+  update: async ({ request, fetch }) => {
+    // Update only happens when id exists
+    console.log("Updating...");
+    const data = Object.fromEntries((await request.formData()).entries());
+    const seguimientoData = SeguimientoSchema(data);
+    console.log(JSON.stringify(seguimientoData));
+    if (seguimientoData instanceof type.errors) {
+      // Esto no debería ocurrir
+      console.error(seguimientoData.summary);
+      return fail(400, { error: "Error de validación" });
+    }
+    try {
+      const response = await fetch(
+        `${API_URI}/api/seguimientos/${seguimientoData.id}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(seguimientoData),
+        }
+      );
+      if (!response.ok) {
+        return fail(response.status, {
+          error: (await response.json()).detail,
+        });
       }
       return { success: true };
     } catch (error) {

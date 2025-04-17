@@ -1,64 +1,79 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { page } from "$app/state";
+  import type { UnidadDeTrabajo } from "$lib/interfaces.js";
   import {
     faCheckCircle,
     faSave,
     faXmarkCircle,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { crossfade, fade, slide } from "svelte/transition";
 
   const { data, form } = $props();
+  const docenciaId = Number(page.params.docenciaId);
+  const month = Number(page.params.month) + 1;
+  // Gets the current seguimiento tema or the first one
+  let selectedTema: UnidadDeTrabajo | undefined = $state(
+    data.unidadesDeTrabajo.find((value) => {
+      value.id === data.seguimientoActual?.temario_actual ||
+        value.id === data.seguimientoAnterior?.temario_actual;
+    }) ||
+      data.unidadesDeTrabajo[0] ||
+      undefined
+  );
+  //Variable to bind to the cumple_programacion toggle
+  let cumple_programacionValue = $state(
+    data.seguimientoActual?.cumple_programacion ?? true
+  );
+
+  // Update for page changes
   $effect(() => {
     selectedTema =
       data.unidadesDeTrabajo.find(
         (value) =>
           value.id === data.seguimientoActual?.temario_actual ||
           value.id === data.seguimientoAnterior?.temario_actual
-      ) || null;
+      ) ||
+      data.unidadesDeTrabajo[0] ||
+      undefined;
+    cumple_programacionValue =
+      data.seguimientoActual?.cumple_programacion ?? true;
   });
-  let selectedTema = $state(
-    data.unidadesDeTrabajo.find((value) => {
-      value.id === data.seguimientoActual?.temario_actual ||
-        value.id === data.seguimientoAnterior?.temario_actual;
-    }) || null
-  );
-
-  //Variable to bind to the cumple_programacion toggle
-  let cumple_programacionValue = $state(
-    data.seguimientoActual?.cumple_programacion ?? true
-  );
 
   // Function to handle clicking on a list item
   function selectUnit(temaId: number) {
-    selectedTema =
-      data.unidadesDeTrabajo.find((value) => {
-        return value.id === temaId;
-      }) || null;
+    selectedTema = data.unidadesDeTrabajo.find((value) => {
+      return value.id === temaId;
+    });
   }
 </script>
 
-<!--Message if the original profesor is not the current user-->
-{#if data.seguimientoActual && data.seguimientoActual?.profesor.id != data.user?.id}
-  <p class="text-sm italic">
-    Este seguimiento fue realizado originalmente por {data.seguimientoActual
-      ?.profesor.nombre}
-  </p>
-  <div class="divider"></div>
-{/if}
-{#if form?.error}
-  <div role="alert" class="alert alert-error">
-    <Fa icon={faXmarkCircle}></Fa>
-    <span>{form?.error}</span>
-  </div>
-{/if}
-{#if form?.success}
-  <div role="alert" class="alert alert-success">
-    <Fa icon={faCheckCircle}></Fa>
-    <span>Guardado correctamente.</span>
-  </div>
-{/if}
-<form method="POST" class="flex flex-wrap relative" use:enhance>
+<div>
+  <h1 class="text-xl text-neutral font-semibold">
+    Seguimiento para {data.docencia?.modulo.nombre} - {data.docencia?.grupo
+      .nombre}
+  </h1>
+  <!--Message if the original profesor is not the current user-->
+  {#if data.seguimientoActual && data.seguimientoActual?.profesor.id != data.user?.id}
+    <div transition:slide>
+      <p class="text-sm italic">
+        Este seguimiento fue realizado originalmente por {data.seguimientoActual
+          ?.profesor.nombre}
+      </p>
+    </div>
+  {/if}
+</div>
+<div class="divider"></div>
+<form
+  method="POST"
+  class="flex flex-wrap relative"
+  use:enhance={() => {
+    return async ({ update }) => {
+      await update({ reset: false });
+    };
+  }}
+>
   <!--hidden id when the seguimiento exists, so that it can be updated on the server-->
   <input
     type="number"
@@ -67,13 +82,15 @@
     value={data.seguimientoActual ? data.seguimientoActual.id : ""}
   />
   <!--hidden month input to pass it in the form-->
-  <input type="number" name="mes" hidden value={Number(page.params.month)} />
+  <input type="number" name="mes" hidden value={month} />
   <!--hidden month input to pass it in the form-->
   <input
     type="number"
     name="docencia"
     hidden
-    value={Number(page.params.docencia)}
+    value={data.seguimientoActual
+      ? data.seguimientoActual.docencia
+      : docenciaId}
   />
   <!-- Container for the entire form with padding to create overall form margins if needed -->
   <div class="w-full flex flex-wrap">
@@ -107,7 +124,13 @@
               />
 
               <!-- Label that contains the text -->
-              <label for={`${tema.id}`} class="text-lg">
+              <label
+                for={`${tema.id}`}
+                class="text-lg transition-all {selectedTema &&
+                selectedTema.id === tema.id
+                  ? 'font-bold'
+                  : ''} "
+              >
                 {tema.titulo}
               </label>
 
@@ -208,17 +231,34 @@
           name="justificacion_cumple_programacion"
           id="justificacion_cumple_programacion"
           class="textarea h-24"
-          placeholder={data.seguimientoAnterior?.justificacion_estado
+          placeholder={data.seguimientoAnterior
+            ?.justificacion_cumple_programacion
             ? `En el seguimiento anterior indicaste: ${data.seguimientoAnterior.justificacion_cumple_programacion}`
-            : "Justificación del estado actual"}
+            : "Justificación de que no cumpla la programación"}
           disabled={cumple_programacionValue}
-          >{data.seguimientoActual?.justificacion_estado}</textarea
+          >{data.seguimientoActual?.justificacion_cumple_programacion}</textarea
         >
         <label for="justificacion_cumple_programacion" class="fieldset-label"
           >Opcional</label
         >
       </fieldset>
     </div>
+    {#if form?.error}
+      <div role="alert" class="alert alert-error w-full mt-4" transition:slide>
+        <Fa icon={faXmarkCircle}></Fa>
+        <span>{form?.error}</span>
+      </div>
+    {/if}
+    {#if form?.success}
+      <div
+        role="alert"
+        class="alert alert-success w-full mt-4"
+        transition:slide
+      >
+        <Fa icon={faCheckCircle}></Fa>
+        <span>Guardado correctamente.</span>
+      </div>
+    {/if}
     <!--Submit button-->
     <div class="w-full flex justify-end mt-4">
       {#if data.seguimientoActual}
