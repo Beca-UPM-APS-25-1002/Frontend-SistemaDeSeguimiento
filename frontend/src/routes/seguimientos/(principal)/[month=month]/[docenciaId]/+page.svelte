@@ -11,34 +11,29 @@
   import { crossfade, fade, slide } from "svelte/transition";
 
   const { data, form } = $props();
-  const docenciaId = Number(page.params.docenciaId);
-  const month = Number(page.params.month) + 1;
+  let docenciaId = $state(Number(page.params.docenciaId));
+  let month = $state(Number(page.params.month));
   // Gets the current seguimiento tema or the first one
-  let selectedTema: UnidadDeTrabajo | undefined = $state(
-    data.unidadesDeTrabajo.find((value) => {
-      value.id === data.seguimientoActual?.temario_actual ||
-        value.id === data.seguimientoAnterior?.temario_actual;
-    }) ||
-      data.unidadesDeTrabajo[0] ||
-      undefined
-  );
+  let selectedTema: UnidadDeTrabajo | undefined = $state();
   //Variable to bind to the cumple_programacion toggle
-  let cumple_programacionValue = $state(
-    data.seguimientoActual?.cumple_programacion ?? true
-  );
-
+  let cumple_programacionValue: boolean | undefined = $state();
   // Update for page changes
   $effect(() => {
+    console.log(data.seguimientoActual);
+    console.log(data.unidadesDeTrabajo);
     selectedTema =
       data.unidadesDeTrabajo.find(
-        (value) =>
-          value.id === data.seguimientoActual?.temario_actual ||
-          value.id === data.seguimientoAnterior?.temario_actual
+        (value) => value.id === data.seguimientoActual?.temario_actual
+      ) ||
+      data.unidadesDeTrabajo.find(
+        (value) => value.id === data.seguimientoAnterior?.temario_actual
       ) ||
       data.unidadesDeTrabajo[0] ||
       undefined;
     cumple_programacionValue =
       data.seguimientoActual?.cumple_programacion ?? true;
+    docenciaId = Number(page.params.docenciaId);
+    month = Number(page.params.month);
   });
 
   // Function to handle clicking on a list item
@@ -110,7 +105,10 @@
               class="step {selectedTema &&
               tema.numero_tema <= selectedTema?.numero_tema
                 ? 'step-primary'
-                : ''} clickable-step"
+                : ''} clickable-step transition-all {selectedTema &&
+              selectedTema.id === tema.id
+                ? 'font-bold'
+                : ''}"
             >
               <!-- Hidden radio button that will be part of the form submission -->
               <input
@@ -124,13 +122,7 @@
               />
 
               <!-- Label that contains the text -->
-              <label
-                for={`${tema.id}`}
-                class="text-lg transition-all {selectedTema &&
-                selectedTema.id === tema.id
-                  ? 'font-bold'
-                  : ''} "
-              >
+              <label for={`${tema.id}`} class="text-lg">
                 {tema.titulo}
               </label>
 

@@ -15,23 +15,24 @@
   import { page } from "$app/state";
 
   const months = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
+    { name: "Septiembre", value: 9 },
+    { name: "Octubre", value: 10 },
+    { name: "Noviembre", value: 11 },
+    { name: "Diciembre", value: 12 },
+    { name: "Enero", value: 1 },
+    { name: "Febrero", value: 2 },
+    { name: "Marzo", value: 3 },
+    { name: "Abril", value: 4 },
+    { name: "Mayo", value: 5 },
+    { name: "Junio", value: 6 },
+    { name: "Julio", value: 7 },
+    { name: "Agosto", value: 8 },
   ];
 
   // Default to current month
-  let selectedMonth = $state(new Date().getMonth());
-
+  let selectedMonth = $state(
+    Number(page.params.month) ?? new Date().getMonth() + 1
+  );
   const {
     docencias,
     seguimientosFaltantes,
@@ -84,8 +85,8 @@
     seguimientosFaltantes: SeguimientosFaltantesPorMes
   ): boolean {
     return (
-      !seguimientosFaltantes[month + 1] ||
-      !seguimientosFaltantes[month + 1].includes(docenciaId)
+      !seguimientosFaltantes[month] ||
+      !seguimientosFaltantes[month].includes(docenciaId)
     );
   }
 
@@ -128,8 +129,8 @@
         name="month_selector"
         bind:value={selectedMonth}
       >
-        {#each months as month, index}
-          <option value={index}>{month}</option>
+        {#each months as month}
+          <option value={month.value}>{month.name}</option>
         {/each}
       </select>
     </div>

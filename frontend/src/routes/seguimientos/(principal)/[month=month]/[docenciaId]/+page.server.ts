@@ -10,7 +10,7 @@ import { error, fail } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {
-    const month = Number(params.month) + 1;
+    const month = Number(params.month);
     const docenciaId = params.docenciaId;
 
     // Fetch data in parallel
@@ -35,7 +35,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
     // Filter and sort relevant seguimientos
     const filteredSeguimientos = filterAndSortSeguimientos(
       seguimientos,
-      docencia
+      docencia,
+      month
     );
     // Determine current and previous seguimientos
     const { seguimientoActual, seguimientoAnterior } = determineSeguimientos(
@@ -101,24 +102,54 @@ async function fetchTemario(fetch: Function, moduloId: number) {
 }
 
 /**
- * Filters seguimientos related to the docencia and sorts by descending month
+ * Filters seguimientos related to the docencia and sorts by academic month in descending order,
+ * accounting for academic years where September (month 9) comes before January (month 1)
  */
 function filterAndSortSeguimientos(
   seguimientos: Seguimiento[],
-  docencia: Docencia
+  docencia: Docencia,
+  month: number
 ): Seguimiento[] {
   return seguimientos
     .filter(
       (seguimiento) =>
         // Condition 1: Same docencia number
-        seguimiento.docencia === docencia.id ||
-        // Condition 2: Same grupo and modulo combination
-        (seguimiento.grupo.id === docencia.grupo.id &&
-          seguimiento.modulo.id === docencia.modulo.id)
+        (seguimiento.docencia === docencia.id ||
+          // Condition 2: Same grupo and modulo combination
+          (seguimiento.grupo.id === docencia.grupo.id &&
+            seguimiento.modulo.id === docencia.modulo.id)) &&
+        // Uses only the seguimientos from the past and not the future
+        // Accounting isInPastOrCurrentAcademicMonthfor academic year (September = 9 to August = 8)
+        isInPastOrCurrentAcademicMonth(seguimiento.mes, month)
     )
-    .toSorted((a, b) => a.mes - b.mes);
+    .toSorted((a, b) => compareAcademicMonths(b.mes, a.mes)); // Puts the most recent seguimiento first
+}
+/**
+ * Determines if a month is in the past or current based on academic year perspective
+ * where September (9) is the start of the academic year
+ */
+function isInPastOrCurrentAcademicMonth(
+  seguimientoMonth: number,
+  currentMonth: number
+): boolean {
+  // Convert both months to 0-based system where September = 0, October = 1, etc.
+  const academicSeguimientoMonth = (seguimientoMonth + 3) % 12;
+  const academicCurrentMonth = (currentMonth + 3) % 12;
+
+  return academicSeguimientoMonth <= academicCurrentMonth;
 }
 
+/**
+ * Compares two months based on academic year ordering
+ * Returns positive if a > b, negative if a < b, 0 if equal
+ */
+function compareAcademicMonths(a: number, b: number): number {
+  // Convert both months to 0-based system where September = 0, October = 1, etc.
+  const academicMonthA = (a + 3) % 12;
+  const academicMonthB = (b + 3) % 12;
+
+  return academicMonthA - academicMonthB;
+}
 /**
  * Determines which seguimientos are current and previous based on the month
  */
@@ -128,17 +159,15 @@ function determineSeguimientos(
 ) {
   let seguimientoActual: Seguimiento | undefined = undefined;
   let seguimientoAnterior: Seguimiento | undefined = undefined;
-
+  console.log(sortedSeguimientos);
   if (sortedSeguimientos.length === 0) {
-    console.log("Nothing");
     return { seguimientoActual, seguimientoAnterior };
   }
 
   if (sortedSeguimientos.length === 1) {
-    console.log(sortedSeguimientos[0].mes + " - " + month);
     if (sortedSeguimientos[0].mes === month) {
       seguimientoActual = sortedSeguimientos[0];
-    } else if (sortedSeguimientos[0].mes < month) {
+    } else {
       seguimientoAnterior = sortedSeguimientos[0];
     }
     return { seguimientoActual, seguimientoAnterior };
@@ -148,7 +177,7 @@ function determineSeguimientos(
   if (sortedSeguimientos[0].mes === month) {
     seguimientoActual = sortedSeguimientos[0];
     seguimientoAnterior = sortedSeguimientos[1];
-  } else if (sortedSeguimientos[0].mes < month) {
+  } else {
     seguimientoAnterior = sortedSeguimientos[0];
   }
 
@@ -191,9 +220,8 @@ export const actions: Actions = {
         body: JSON.stringify(seguimientoData),
       });
       if (!response.ok) {
-        console.error(response);
         return fail(response.status, {
-          error: (await response.json()).detail,
+          error: JSON.stringify(await response.json()),
         });
       }
       return { success: true };
@@ -225,8 +253,9 @@ export const actions: Actions = {
         }
       );
       if (!response.ok) {
+        console.error(response);
         return fail(response.status, {
-          error: (await response.json()).detail,
+          error: JSON.stringify(await response.json()),
         });
       }
       return { success: true };
