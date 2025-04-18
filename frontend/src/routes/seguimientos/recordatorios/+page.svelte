@@ -9,6 +9,7 @@
     faPaperPlane,
     faXmarkCircle,
   } from "@fortawesome/free-solid-svg-icons";
+  import { onDestroy, onMount } from "svelte";
   import Fa from "svelte-fa";
   import { slide } from "svelte/transition";
 
@@ -29,12 +30,19 @@
       goto(`?${query.toString()}`);
     }
   });
+
   let selectedRows = $state<number[]>([]);
+  let docenciasFiltered = $state<Docencia[]>([]);
+  $effect(() => {
+    data.seguimientosFaltantes.then((result) => {
+      docenciasFiltered = result.filter((item) => item.profesor.activo);
+    });
+    selectedRows = [];
+  });
+  // Selects and deselects all rows
   function selectAll(element: any, seguimientos: Docencia[]) {
     if (element.target.checked) {
-      selectedRows = seguimientos
-        .filter((item) => item.profesor.activo)
-        .map((item) => item.id);
+      selectedRows = docenciasFiltered.map((item) => item.id);
     } else {
       selectedRows = [];
     }
@@ -77,7 +85,9 @@
         transition:slide
       >
         <Fa icon={faCheckCircle}></Fa>
-        <span>{form.success}</span>
+        <span
+          >Se han enviado {form.success.n_emails} correos de recordatorio
+        </span>
       </div>
     {/if}
     <div class="card">
@@ -106,11 +116,9 @@
                         type="checkbox"
                         class="checkbox bg-base-100 checked:bg-base-100 rounded-md"
                         checked={selectedRows.length ===
-                          docencias.filter((item) => item.profesor.activo)
-                            .length}
+                          docenciasFiltered.length}
                         indeterminate={selectedRows.length !==
-                          docencias.filter((item) => item.profesor.activo)
-                            .length && selectedRows.length !== 0}
+                          docenciasFiltered.length && selectedRows.length !== 0}
                         onchange={(e) => selectAll(e, docencias)}
                       />
                     </th>

@@ -35,7 +35,7 @@ export const actions: Actions = {
         console.error(response);
         return fail(400, { error: "Error al enviar los recordatorios" });
       }
-      return { success: (await response.json()).detail };
+      return { success: { n_emails: (await response.json()).emails_enviados } };
     } catch (error) {
       console.error(error);
       return fail(500, { error: "Error de conexión con el servidor" });

@@ -33,9 +33,9 @@
   } = $props();
 
   let searchQuery = $state("");
-  let filteredDocencias = $state<Docencia[]>([]);
   let expandedView = $state(false);
   let resolvedDocencias = $state<Docencia[]>([]);
+  let filteredDocencias = $state<Docencia[]>([]);
 
   docencias.then((result) => {
     resolvedDocencias = result.sort((a, b) => {
@@ -49,10 +49,11 @@
 
       return groupNameComparison;
     });
+    filteredDocencias = resolvedDocencias;
   });
 
   // Computed property for filtered docencias
-  $effect(() => {
+  function queryChange() {
     if (!searchQuery.trim()) {
       filteredDocencias = resolvedDocencias;
     } else {
@@ -63,7 +64,7 @@
           doc.grupo.nombre.toLowerCase().includes(query)
       );
     }
-  });
+  }
 
   // Function to check if seguimiento is completed
   function isSeguimientoCompleted(
@@ -121,6 +122,7 @@
               type="text"
               placeholder="Buscar docencias..."
               class="input input-bordered w-full"
+              oninput={queryChange}
               bind:value={searchQuery}
             />
           </div>
