@@ -1,12 +1,18 @@
 <script lang="ts">
+  import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import MonthSelector from "$lib/components/MonthSelector.svelte";
   import type { Docencia } from "$lib/interfaces.js";
-  import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+  import {
+    faCheckCircle,
+    faPaperPlane,
+    faXmarkCircle,
+  } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { slide } from "svelte/transition";
 
-  const { data } = $props();
+  const { data, form } = $props();
   let selectedMonth = $derived(
     Number(page.url.searchParams.get("month")) || new Date().getMonth() + 1
   );
@@ -26,7 +32,9 @@
   let selectedRows = $state<number[]>([]);
   function selectAll(element: any, seguimientos: Docencia[]) {
     if (element.target.checked) {
-      selectedRows = seguimientos.map((item) => item.id);
+      selectedRows = seguimientos
+        .filter((item) => item.profesor.activo)
+        .map((item) => item.id);
     } else {
       selectedRows = [];
     }
@@ -34,7 +42,10 @@
 </script>
 
 <div class="bg-base-200 flex justify-center">
-  <div class="container p-4 bg-base-100 shadow-2xl rounded-2xl mx-auto my-4">
+  <form
+    method="POST"
+    class="container p-4 bg-base-100 shadow-2xl rounded-2xl mx-auto my-4"
+  >
     <div class="flex flex-col gap-2">
       <h1 class="text-2xl font-bold">Seguimientos Faltantes</h1>
       <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
@@ -43,13 +54,32 @@
           <MonthSelector bind:selectedMonth></MonthSelector>
         </div>
         <div class="md:ml-auto">
-          <button type="submit" class="btn btn-primary">
-            Procesar Seleccionados
+          <button
+            type="submit"
+            class="btn btn-primary"
+            disabled={selectedRows.length === 0}
+          >
+            <Fa icon={faPaperPlane}></Fa>
+            Enviar {selectedRows.length} recordatorios
           </button>
         </div>
       </div>
     </div>
-
+    {#if form?.error}
+      <div role="alert" class="alert alert-error w-full mt-4" transition:slide>
+        <Fa icon={faXmarkCircle}></Fa>
+        <span>{form?.error}</span>
+      </div>
+    {:else if form?.success}
+      <div
+        role="alert"
+        class="alert alert-success w-full mt-4"
+        transition:slide
+      >
+        <Fa icon={faCheckCircle}></Fa>
+        <span>{form.success}</span>
+      </div>
+    {/if}
     <div class="card">
       <div class="card-body">
         <h2 class="card-title mb-4">Listado de Seguimientos Pendientes</h2>
@@ -74,10 +104,13 @@
                     <th>
                       <input
                         type="checkbox"
-                        class="checkbox bg-base-100 checked:bg-base-200 rounded-md"
-                        checked={selectedRows.length === docencias.length}
+                        class="checkbox bg-base-100 checked:bg-base-100 rounded-md"
+                        checked={selectedRows.length ===
+                          docencias.filter((item) => item.profesor.activo)
+                            .length}
                         indeterminate={selectedRows.length !==
-                          docencias.length && selectedRows.length !== 0}
+                          docencias.filter((item) => item.profesor.activo)
+                            .length && selectedRows.length !== 0}
                         onchange={(e) => selectAll(e, docencias)}
                       />
                     </th>
@@ -91,17 +124,18 @@
                 <tbody>
                   {#each docencias as docencia}
                     <tr
-                      class={selectedRows.includes(docencia.id)
-                        ? "bg-primary"
-                        : ""}
+                      class="{selectedRows.includes(docencia.id)
+                        ? 'bg-primary bg-'
+                        : ''} "
                     >
                       <td>
                         <input
                           type="checkbox"
-                          class="checkbox rounded-md"
+                          class="checkbox bg-base-100 checked:bg-base-100 disabled:bg-base-300 rounded-md"
                           bind:group={selectedRows}
                           name="docencias"
                           value={docencia.id}
+                          disabled={!docencia.profesor.activo}
                         /></td
                       >
                       <td>
@@ -110,6 +144,11 @@
                           <span class="text-xs opacity-70"
                             >{docencia.profesor.email}</span
                           >
+                          {#if !docencia.profesor.activo}
+                            <span class="text-xs opacity-70 text-error"
+                              >No activo</span
+                            >
+                          {/if}
                         </div>
                       </td>
                       <td>{docencia.modulo.nombre}</td>
@@ -125,5 +164,5 @@
         {/await}
       </div>
     </div>
-  </div>
+  </form>
 </div>

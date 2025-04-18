@@ -16,7 +16,7 @@
   let { selectedMonth = $bindable() } = $props();
 </script>
 
-<div class="w-full mt-2">
+<div class="w-full">
   <select
     class="select select-bordered w-full"
     name="month_selector"

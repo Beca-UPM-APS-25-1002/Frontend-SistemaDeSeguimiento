@@ -105,7 +105,7 @@
     </div>
   </div>
   <div class="p-2">
-    <p class="text-xs italic mt-1">
+    <p class="text-xs italic mb-2">
       Selecciona el mes de consulta de las docencias
     </p>
 
