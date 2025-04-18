@@ -7,6 +7,7 @@ import type {
 import { type } from "arktype";
 import type { Actions, PageServerLoad } from "./$types.js";
 import { error, fail } from "@sveltejs/kit";
+import { getDocenciaAPI, getSeguimientosAPI } from "$lib/APIUtils.js";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {
@@ -15,8 +16,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
     // Fetch data in parallel
     const [seguimientosResponse, docenciaResponse] = await Promise.all([
-      fetchSeguimientos(fetch, month),
-      fetchDocencia(fetch, docenciaId),
+      getSeguimientosAPI(fetch, month),
+      getDocenciaAPI(fetch, docenciaId),
     ]);
     if (!docenciaResponse.ok) {
       error(404, {
@@ -28,7 +29,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
     const docencia = (await docenciaResponse.json()) as Docencia;
 
     // Fetch temario using the modulo id from docencia
-    const temarioResponse = await fetchTemario(fetch, docencia.modulo.id);
+    const temarioResponse = await getTemarioAPI(fetch, docencia.modulo.id);
     const unidadesDeTrabajo =
       (await temarioResponse.json()) as UnidadDeTrabajo[];
 
@@ -66,33 +67,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 };
 
 /**
- * Fetches seguimientos for the specified month
- */
-async function fetchSeguimientos(fetch: Function, month: number) {
-  return fetch(`${API_URI}/api/seguimientos/`, {
-    method: "GET",
-    headers: {
-      "Content-": "application/json",
-    },
-  });
-}
-
-/**
- * Fetches a specific docencia by ID
- */
-async function fetchDocencia(fetch: Function, docenciaId: string) {
-  return fetch(`${API_URI}/api/docencias/${docenciaId}/`, {
-    method: "GET",
-    headers: {
-      "Content-": "application/json",
-    },
-  });
-}
-
-/**
  * Fetches temario (curriculum units) for a specific modulo
  */
-async function fetchTemario(fetch: Function, moduloId: number) {
+async function getTemarioAPI(fetch: Function, moduloId: number) {
   return fetch(`${API_URI}/api/modulos/${moduloId}/temario/`, {
     method: "GET",
     headers: {
@@ -126,7 +103,7 @@ function filterAndSortSeguimientos(
 }
 /**
  * Determines if a month is in the past or current based on academic year perspective
- * where September (9) is the start of the academic year
+ * where September (9) is the start of the academic year.
  */
 function isInPastOrCurrentAcademicMonth(
   seguimientoMonth: number,
@@ -140,8 +117,9 @@ function isInPastOrCurrentAcademicMonth(
 }
 
 /**
- * Compares two months based on academic year ordering
- * Returns positive if a > b, negative if a < b, 0 if equal
+ * Compares two months based on academic year ordering perspective
+ * where September (9) is the start of the academic year
+ * @Returns positive if a > b, negative if a < b, 0 if equal
  */
 function compareAcademicMonths(a: number, b: number): number {
   // Convert both months to 0-based system where September = 0, October = 1, etc.

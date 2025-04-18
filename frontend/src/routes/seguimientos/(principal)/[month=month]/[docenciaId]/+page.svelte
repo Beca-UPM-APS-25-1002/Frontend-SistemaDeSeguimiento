@@ -8,34 +8,26 @@
     faXmarkCircle,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
-  import { crossfade, fade, slide } from "svelte/transition";
+  import { slide } from "svelte/transition";
 
   const { data, form } = $props();
-  let docenciaId = $state(Number(page.params.docenciaId));
-  let month = $state(Number(page.params.month));
+  let docenciaId = $derived(Number(page.params.docenciaId));
+  let month = $derived(Number(page.params.month));
   // Gets the current seguimiento tema or the first one
-  let selectedTema: UnidadDeTrabajo | undefined = $state();
-  //Variable to bind to the cumple_programacion toggle
-  let cumple_programacionValue: boolean | undefined = $state();
-  // Update for page changes
-  $effect(() => {
-    console.log(data.seguimientoActual);
-    console.log(data.unidadesDeTrabajo);
-    selectedTema =
-      data.unidadesDeTrabajo.find(
-        (value) => value.id === data.seguimientoActual?.temario_actual
-      ) ||
+  let selectedTema: UnidadDeTrabajo | undefined = $derived(
+    data.unidadesDeTrabajo.find(
+      (value) => value.id === data.seguimientoActual?.temario_actual
+    ) ||
       data.unidadesDeTrabajo.find(
         (value) => value.id === data.seguimientoAnterior?.temario_actual
       ) ||
       data.unidadesDeTrabajo[0] ||
-      undefined;
-    cumple_programacionValue =
-      data.seguimientoActual?.cumple_programacion ?? true;
-    docenciaId = Number(page.params.docenciaId);
-    month = Number(page.params.month);
-  });
-
+      undefined
+  );
+  //Variable to bind to the cumple_programacion toggle
+  let cumple_programacionValue: boolean | undefined = $derived(
+    data.seguimientoActual?.cumple_programacion ?? true
+  );
   // Function to handle clicking on a list item
   function selectUnit(temaId: number) {
     selectedTema = data.unidadesDeTrabajo.find((value) => {
