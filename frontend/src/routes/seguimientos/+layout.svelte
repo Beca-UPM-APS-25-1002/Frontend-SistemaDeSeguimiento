@@ -14,25 +14,26 @@
   <div class="navbar bg-base-100 shadow-md">
     <div class="navbar-start">
       <a
-        class="btn btn-ghost text-xl"
+        class="btn btn-ghost text-xl shadow-lg"
         aria-label="homescreen"
         title="Pantalla Principal"
         href="/seguimientos"
       >
         <Fa icon={faHouse}></Fa>
       </a>
+
       {#if data.user?.is_admin}
         <a
-          class="btn btn-ghost text-xl"
+          class="btn btn-ghost text-xl shadow-lg"
           title="Recordatorios de seguimientos"
           href="/seguimientos/recordatorios"
         >
           <Fa icon={faEnvelope}></Fa>
         </a>
         <a
-          class="btn btn-ghost text-xl"
+          class="btn btn-ghost text-xl shadow-lg"
           title="Administración"
-          href="http://localhost:8000/admin"
+          href="{data.backend_url}/admin"
         >
           <Fa icon={faGear}></Fa>
         </a>
@@ -43,7 +44,7 @@
 
       <form method="POST" action="/?/logout">
         <button
-          class="btn btn-square btn-ghost"
+          class="btn btn-square btn-ghost shadow-lg"
           title="Cerrar Sesión"
           aria-label="Logout"
         >

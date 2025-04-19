@@ -26,8 +26,8 @@
   <DocenciaNav
     docencias={data.docencias}
     seguimientosFaltantes={data.seguimientosFaltantes}
-    docenciaActual={-1}
-    mesActual={-1}
+    docenciaActual={Number(page.params.docenciaId)}
+    mesActual={Number(page.params.month)}
   />
 
   <!-- Content area - Always visible on desktop, only on subpages for mobile -->

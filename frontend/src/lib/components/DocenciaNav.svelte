@@ -13,31 +13,18 @@
     faSquare,
   } from "@fortawesome/free-solid-svg-icons";
   import { page } from "$app/state";
-
-  const months = [
-    { name: "Septiembre", value: 9 },
-    { name: "Octubre", value: 10 },
-    { name: "Noviembre", value: 11 },
-    { name: "Diciembre", value: 12 },
-    { name: "Enero", value: 1 },
-    { name: "Febrero", value: 2 },
-    { name: "Marzo", value: 3 },
-    { name: "Abril", value: 4 },
-    { name: "Mayo", value: 5 },
-    { name: "Junio", value: 6 },
-    { name: "Julio", value: 7 },
-    { name: "Agosto", value: 8 },
-  ];
+  import MonthSelector from "./MonthSelector.svelte";
 
   // Default to current month
+
   let selectedMonth = $state(
-    Number(page.params.month) ?? new Date().getMonth() + 1
+    Number(page.params.month) || new Date().getMonth() + 1
   );
   const {
     docencias,
     seguimientosFaltantes,
-    docenciaActual = -1,
-    mesActual = -1,
+    docenciaActual = NaN,
+    mesActual = NaN,
   }: {
     docencias: Promise<Docencia[]>;
     seguimientosFaltantes: Promise<SeguimientosFaltantesPorMes>;
@@ -46,9 +33,9 @@
   } = $props();
 
   let searchQuery = $state("");
-  let filteredDocencias = $state<Docencia[]>([]);
   let expandedView = $state(false);
   let resolvedDocencias = $state<Docencia[]>([]);
+  let filteredDocencias = $state<Docencia[]>([]);
 
   docencias.then((result) => {
     resolvedDocencias = result.sort((a, b) => {
@@ -62,10 +49,11 @@
 
       return groupNameComparison;
     });
+    filteredDocencias = resolvedDocencias;
   });
 
   // Computed property for filtered docencias
-  $effect(() => {
+  function queryChange() {
     if (!searchQuery.trim()) {
       filteredDocencias = resolvedDocencias;
     } else {
@@ -76,7 +64,7 @@
           doc.grupo.nombre.toLowerCase().includes(query)
       );
     }
-  });
+  }
 
   // Function to check if seguimiento is completed
   function isSeguimientoCompleted(
@@ -118,22 +106,12 @@
     </div>
   </div>
   <div class="p-2">
-    <p class="text-xs italic mt-1">
+    <p class="text-xs italic mb-2">
       Selecciona el mes de consulta de las docencias
     </p>
 
     <!-- Month selector -->
-    <div class="w-full mt-2">
-      <select
-        class="select select-bordered w-full"
-        name="month_selector"
-        bind:value={selectedMonth}
-      >
-        {#each months as month}
-          <option value={month.value}>{month.name}</option>
-        {/each}
-      </select>
-    </div>
+    <MonthSelector bind:selectedMonth></MonthSelector>
 
     <!-- Search input -->
     {#if expandedView}
@@ -144,6 +122,7 @@
               type="text"
               placeholder="Buscar docencias..."
               class="input input-bordered w-full"
+              oninput={queryChange}
               bind:value={searchQuery}
             />
           </div>
@@ -170,11 +149,11 @@
         <div class="divide-y divide-accent">
           {#each filteredDocencias as docencia, i (docencia.id)}
             <div transition:fade|local={{ delay: i * 50, duration: 200 }}>
-              <div class="m-1 flex items-center">
+              <div class="m-1 flex items-center shadow-md rounded-2xl">
                 <a
                   class="w-full text-left hover:bg-base-200 transition-all rounded-lg flex items-center p-2 {docencia.id ==
                     docenciaActual && selectedMonth == mesActual
-                    ? 'bg-base-300'
+                    ? 'bg-base-200'
                     : ''}"
                   href="/seguimientos/{selectedMonth}/{docencia.id}"
                 >
@@ -206,6 +185,13 @@
                     </div>
                   </div>
                 </a>
+                <a
+                  href="/seguimientos/tabla/{String(docencia.id)}"
+                  class="btn btn-ghost"
+                  title="Tabla de seguimientos"
+                >
+                  <Fa icon={faTable}></Fa></a
+                >
               </div>
             </div>
           {/each}

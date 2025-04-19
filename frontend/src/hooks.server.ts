@@ -10,11 +10,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   const token = event.cookies.get("authToken");
 
   // If no authToken is found then go to login
-  if (
-    !token &&
-    event.url.pathname != "/" &&
-    event.url.pathname != "/register"
-  ) {
+  if (!token && event.url.pathname.startsWith("/seguimientos")) {
     const redirectPath = "/?redirectTo=" + event.url.pathname;
     throw redirect(302, redirectPath);
   } else if (token) {
