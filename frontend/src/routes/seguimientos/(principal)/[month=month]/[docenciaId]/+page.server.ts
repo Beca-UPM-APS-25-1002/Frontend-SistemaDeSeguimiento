@@ -9,6 +9,10 @@ import type { Actions, PageServerLoad } from "./$types.js";
 import { error, fail } from "@sveltejs/kit";
 import { getDocenciaAPI, getSeguimientosAPI } from "$lib/APIUtils.js";
 import { formatErrorMessages } from "$lib/errorFormatUtils.js";
+import {
+  isInPastOrCurrentAcademicMonth,
+  compareAcademicMonths,
+} from "$lib/academicMonthUtils.js";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {
@@ -17,7 +21,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
     // Fetch data in parallel
     const [seguimientosResponse, docenciaResponse] = await Promise.all([
-      getSeguimientosAPI(fetch, month),
+      getSeguimientosAPI(fetch),
       getDocenciaAPI(fetch, docenciaId),
     ]);
     if (!docenciaResponse.ok) {
@@ -102,33 +106,7 @@ function filterAndSortSeguimientos(
     )
     .toSorted((a, b) => compareAcademicMonths(b.mes, a.mes)); // Puts the most recent seguimiento first
 }
-/**
- * Determines if a month is in the past or current based on academic year perspective
- * where September (9) is the start of the academic year.
- */
-function isInPastOrCurrentAcademicMonth(
-  seguimientoMonth: number,
-  currentMonth: number
-): boolean {
-  // Convert both months to 0-based system where September = 0, October = 1, etc.
-  const academicSeguimientoMonth = (seguimientoMonth + 3) % 12;
-  const academicCurrentMonth = (currentMonth + 3) % 12;
 
-  return academicSeguimientoMonth <= academicCurrentMonth;
-}
-
-/**
- * Compares two months based on academic year ordering perspective
- * where September (9) is the start of the academic year
- * @Returns positive if a > b, negative if a < b, 0 if equal
- */
-function compareAcademicMonths(a: number, b: number): number {
-  // Convert both months to 0-based system where September = 0, October = 1, etc.
-  const academicMonthA = (a + 3) % 12;
-  const academicMonthB = (b + 3) % 12;
-
-  return academicMonthA - academicMonthB;
-}
 /**
  * Determines which seguimientos are current and previous based on the month
  */

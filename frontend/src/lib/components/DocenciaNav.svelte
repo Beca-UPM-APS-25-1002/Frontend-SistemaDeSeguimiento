@@ -149,12 +149,12 @@
         <div class="divide-y divide-accent">
           {#each filteredDocencias as docencia, i (docencia.id)}
             <div transition:fade|local={{ delay: i * 50, duration: 200 }}>
-              <div class="m-1 flex items-center">
+              <div class="m-1 flex items-center shadow-md rounded-2xl">
                 <a
                   class="w-full text-left hover:bg-base-200 transition-all rounded-lg flex items-center p-2 {docencia.id ==
                     docenciaActual && selectedMonth == mesActual
                     ? 'bg-base-200'
-                    : ''} shadow-sm"
+                    : ''}"
                   href="/seguimientos/{selectedMonth}/{docencia.id}"
                 >
                   {#await seguimientosFaltantes}
@@ -185,6 +185,13 @@
                     </div>
                   </div>
                 </a>
+                <a
+                  href="/seguimientos/tabla/{String(docencia.id)}"
+                  class="btn btn-ghost"
+                  title="Tabla de seguimientos"
+                >
+                  <Fa icon={faTable}></Fa></a
+                >
               </div>
             </div>
           {/each}

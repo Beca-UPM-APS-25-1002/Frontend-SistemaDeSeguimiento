@@ -91,9 +91,8 @@ export async function getDocenciasAPI(
 /**
  * Fetches seguimientos for the specified month
  * @param fetch Svelte Kit fetch
- * @param month Month to get seguimientos from
  */
-export async function getSeguimientosAPI(fetch: Function, month: number) {
+export async function getSeguimientosAPI(fetch: Function) {
   return fetch(`${API_URI}/api/seguimientos/`, {
     method: "GET",
     headers: {
