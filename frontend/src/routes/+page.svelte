@@ -9,7 +9,7 @@
   import Fa from "svelte-fa";
   import { page } from "$app/state";
   const email = page.url.searchParams.get("email");
-
+  const reset = page.url.searchParams.get("reset");
   let { form } = $props();
 </script>
 
@@ -43,6 +43,9 @@
           name="password"
         />
       </label>
+      <a class="link link-accent text-sm ml-auto" href="/password"
+        >He olvidado mi contraseña</a
+      >
       {#if form?.error}
         <p role="alert" class="alert alert-error">
           <Fa icon={faCircleXmark}></Fa>
@@ -51,6 +54,10 @@
       {:else if email}
         <p role="alert" class="alert alert-success">
           <Fa icon={faCheckCircle}></Fa>Cuenta creada con éxito
+        </p>
+      {:else if reset}
+        <p role="alert" class="alert alert-success">
+          <Fa icon={faCheckCircle}></Fa>Contraseña cambiada con éxito
         </p>
       {/if}
       <button class="btn btn-primary btn-block">Iniciar Sesión</button>

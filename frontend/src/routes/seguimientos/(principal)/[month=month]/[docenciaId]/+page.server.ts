@@ -8,6 +8,7 @@ import { type } from "arktype";
 import type { Actions, PageServerLoad } from "./$types.js";
 import { error, fail } from "@sveltejs/kit";
 import { getDocenciaAPI, getSeguimientosAPI } from "$lib/APIUtils.js";
+import { formatErrorMessages } from "$lib/errorFormatUtils.js";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {
@@ -56,7 +57,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
         message: "Not found",
       });
     }
-    console.log("Load seguimiento: " + err);
+
     return {
       seguimientoActual: undefined,
       seguimientoAnterior: undefined,
@@ -137,7 +138,7 @@ function determineSeguimientos(
 ) {
   let seguimientoActual: Seguimiento | undefined = undefined;
   let seguimientoAnterior: Seguimiento | undefined = undefined;
-  console.log(sortedSeguimientos);
+
   if (sortedSeguimientos.length === 0) {
     return { seguimientoActual, seguimientoAnterior };
   }
@@ -199,7 +200,7 @@ export const actions: Actions = {
       });
       if (!response.ok) {
         return fail(response.status, {
-          error: JSON.stringify(await response.json()),
+          error: formatErrorMessages(await response.json()),
         });
       }
       return { success: true };
@@ -210,10 +211,10 @@ export const actions: Actions = {
   },
   update: async ({ request, fetch }) => {
     // Update only happens when id exists
-    console.log("Updating...");
+
     const data = Object.fromEntries((await request.formData()).entries());
     const seguimientoData = SeguimientoSchema(data);
-    console.log(JSON.stringify(seguimientoData));
+
     if (seguimientoData instanceof type.errors) {
       // Esto no debería ocurrir
       console.error(seguimientoData.summary);
@@ -233,7 +234,7 @@ export const actions: Actions = {
       if (!response.ok) {
         console.error(response);
         return fail(response.status, {
-          error: JSON.stringify(await response.json()),
+          error: formatErrorMessages(await response.json()),
         });
       }
       return { success: true };

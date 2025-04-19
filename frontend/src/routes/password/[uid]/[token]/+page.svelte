@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { page } from "$app/state";
   import {
     faAt,
     faCircleXmark,
@@ -17,32 +18,28 @@
     class="p-8 flex flex-col gap-2 items-center justify-center bg-base-100 shadow-xl rounded-xl w-full max-w-md m-4"
   >
     <h2 class="text-xl font-semibold text-primary-content mb-2">
-      Crea tu cuenta
+      Cambia tu contraseña
     </h2>
     <form
       method="POST"
       class="flex flex-col gap-2 w-full max-w-xs mx-auto"
       use:enhance
     >
-      <label class="input input-bordered w-full validator">
-        <Fa icon={faUser}></Fa>
-        <input type="text" required placeholder="Nombre" name="nombre" />
-      </label>
-      <span class="text-error">{errors?.nombre}</span>
-
-      <label class="input input-bordered w-full validator">
-        <Fa icon={faAt}></Fa>
-        <input type="Email" required placeholder="Email" name="email" />
-      </label>
-      <span class="text-error">{errors?.email}</span>
-
+      <input name="uid" type="text" value={page.params.uid} hidden required />
+      <input
+        name="token"
+        type="text"
+        value={page.params.token}
+        hidden
+        required
+      />
       <label class="input input-bordered w-full validator">
         <Fa icon={faKey}></Fa>
         <input
           type="password"
           minlength="8"
-          placeholder="Contraseña"
-          name="password"
+          placeholder="Nueva contraseña"
+          name="new_password"
           required
         />
       </label>
@@ -51,22 +48,21 @@
         <input
           type="password"
           minlength="8"
-          placeholder="Repite contraseña"
-          name="passwordRepeat"
+          placeholder="Repite nueva contraseña"
+          name="re_new_password"
           required
         />
       </label>
       <span class="text-error">{errors?.password}</span>
 
-      {#if errors?.all}
+      {#if errors && !errors.password}
         <p role="alert" class="alert alert-error">
           <Fa icon={faCircleXmark}></Fa>
-          {errors.all}
+          {errors}
         </p>
       {/if}
 
-      <button class="btn btn-primary btn-block">Crear Usuario</button>
-      <a class="btn btn-secondary btn-sm" href="/">Ya tengo una cuenta</a>
+      <button class="btn btn-primary btn-block">Cambiar contraseña</button>
     </form>
   </div>
 </div>

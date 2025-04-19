@@ -33,7 +33,7 @@
         <a
           class="btn btn-ghost text-xl shadow-lg"
           title="Administración"
-          href="http://localhost:8000/admin"
+          href="{data.backend_url}/admin"
         >
           <Fa icon={faGear}></Fa>
         </a>
