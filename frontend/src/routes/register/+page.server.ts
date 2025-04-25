@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types.js";
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { type } from "arktype";
 
 const RegisterSchema = type({
@@ -26,7 +26,7 @@ export const actions = {
 
     try {
       // Send request for login
-      const response = await fetch(API_URI + "/auth/users/", {
+      const response = await fetch(env.API_URI + "/auth/users/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 import { redirect, type Handle, type HandleFetch } from "@sveltejs/kit";
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 
 export const handle: Handle = async ({ event, resolve }) => {
   /**
@@ -33,7 +33,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       activo: boolean;
       is_admin: boolean;
     }
-    const userRequest = await fetch(`${API_URI}/auth/users/me/`, {
+    const userRequest = await fetch(`${env.API_URI}/auth/users/me/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -41,6 +41,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       },
     });
     if (userRequest.status != 200) {
+      console.log(userRequest);
       // If user is not found or is not properly authenticated
       event.cookies.delete("authToken", { path: "/" });
       throw redirect(302, "/?redirectTo=" + event.url.pathname);
@@ -60,7 +61,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     interface CurrentYear {
       año_academico_actual: string;
     }
-    const yearRequest = await fetch(API_URI + "/api/year-actual/", {
+    const yearRequest = await fetch(env.API_URI + "/api/year-actual/", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -74,7 +75,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
   const token = event.cookies.get("authToken");
-  if (token && request.url.startsWith(API_URI)) {
+  if (token && request.url.startsWith(env.API_URI)) {
     request.headers.set("Authorization", "Token " + token);
   }
   return fetch(request);

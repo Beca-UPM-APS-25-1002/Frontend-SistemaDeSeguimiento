@@ -1,7 +1,7 @@
 import { getSeguimientosFaltantesMes } from "$lib/APIUtils.js";
 import { fail, type Actions } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "../$types.js";
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 
 export const load: LayoutServerLoad = async ({ locals, url, fetch }) => {
   const month =
@@ -24,7 +24,7 @@ export const actions: Actions = {
       return fail(400, { error: "No has seleccionado ninguna docencia" });
     }
     try {
-      const response = await fetch(API_URI + "/api/enviar-recordatorios/", {
+      const response = await fetch(env + "/api/enviar-recordatorios/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

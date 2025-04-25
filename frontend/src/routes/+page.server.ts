@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types.ts";
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { type } from "arktype";
 import process from "process";
 
@@ -27,7 +27,7 @@ export const actions = {
 
     try {
       // Send request for login
-      const response = await fetch(`${API_URI}/auth/token/login/`, {
+      const response = await fetch(`${env.API_URI}/auth/token/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export const actions = {
   logout: async ({ cookies, request, url }) => {
     const token = cookies.get("authToken");
 
-    const response = await fetch(`${API_URI}/auth/token/logout/`, {
+    const response = await fetch(`${env.API_URI}/auth/token/logout/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import type {
   Docencia,
   FetchSvelteKit,
@@ -20,7 +20,7 @@ export async function getSeguimientosFaltantesAño(
   }
   try {
     const response = await fetch(
-      `${API_URI}/api/seguimientos-faltantes-anual/${year}/`,
+      `${env.API_URI}/api/seguimientos-faltantes-anual/${year}/`,
       {
         method: "GET",
         headers: {
@@ -49,7 +49,7 @@ export async function getSeguimientosFaltantesMes(
 ) {
   try {
     const response = await fetch(
-      `${API_URI}/api/seguimientos-faltantes/${year}/${month}/?all`,
+      `${env.API_URI}/api/seguimientos-faltantes/${year}/${month}/?all`,
       {
         method: "GET",
         headers: {
@@ -74,7 +74,7 @@ export async function getDocenciasAPI(
   fetch: FetchSvelteKit
 ): Promise<Docencia[]> {
   try {
-    const response = await fetch(API_URI + "/api/docencias/", {
+    const response = await fetch(env.API_URI + "/api/docencias/", {
       method: "GET",
       headers: {
         "Content-": "application/json",
@@ -93,7 +93,7 @@ export async function getDocenciasAPI(
  * @param fetch Svelte Kit fetch
  */
 export async function getSeguimientosAPI(fetch: Function) {
-  return fetch(`${API_URI}/api/seguimientos/`, {
+  return fetch(`${env.API_URI}/api/seguimientos/`, {
     method: "GET",
     headers: {
       "Content-": "application/json",
@@ -107,7 +107,7 @@ export async function getSeguimientosAPI(fetch: Function) {
  * @param docenciaId ID of the docencia
  */
 export async function getDocenciaAPI(fetch: Function, docenciaId: string) {
-  return fetch(`${API_URI}/api/docencias/${docenciaId}/`, {
+  return fetch(`${env.API_URI}/api/docencias/${docenciaId}/`, {
     method: "GET",
     headers: {
       "Content-": "application/json",

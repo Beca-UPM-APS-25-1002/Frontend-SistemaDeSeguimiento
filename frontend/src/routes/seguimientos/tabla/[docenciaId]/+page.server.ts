@@ -1,4 +1,4 @@
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { getSeguimientosAPI, getDocenciaAPI } from "$lib/APIUtils.js";
 import type {
   Seguimiento,
@@ -59,7 +59,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
  * Fetches temario (curriculum units) for a specific modulo
  */
 async function getTemarioAPI(fetch: Function, moduloId: number) {
-  return fetch(`${API_URI}/api/modulos/${moduloId}/temario/`, {
+  return fetch(`${env.API_URI}/api/modulos/${moduloId}/temario/`, {
     method: "GET",
     headers: {
       "Content-": "application/json",

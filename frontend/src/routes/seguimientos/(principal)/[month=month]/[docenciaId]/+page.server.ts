@@ -1,4 +1,4 @@
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import type {
   Docencia,
   Seguimiento,
@@ -75,7 +75,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
  * Fetches temario (curriculum units) for a specific modulo
  */
 async function getTemarioAPI(fetch: Function, moduloId: number) {
-  return fetch(`${API_URI}/api/modulos/${moduloId}/temario/`, {
+  return fetch(`${env.API_URI}/api/modulos/${moduloId}/temario/`, {
     method: "GET",
     headers: {
       "Content-": "application/json",
@@ -169,7 +169,7 @@ export const actions: Actions = {
       return fail(400, { error: "Error de validación" });
     }
     try {
-      const response = await fetch(`${API_URI}/api/seguimientos/`, {
+      const response = await fetch(`${env.API_URI}/api/seguimientos/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +200,7 @@ export const actions: Actions = {
     }
     try {
       const response = await fetch(
-        `${API_URI}/api/seguimientos/${seguimientoData.id}/`,
+        `${env.API_URI}/api/seguimientos/${seguimientoData.id}/`,
         {
           method: "PATCH",
           headers: {

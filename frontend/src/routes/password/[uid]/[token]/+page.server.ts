@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types.js";
-import { API_URI } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { type } from "arktype";
 import { formatErrorMessages } from "$lib/errorFormatUtils.js";
 
@@ -28,7 +28,7 @@ export const actions = {
     try {
       // Send request for login
       const response = await fetch(
-        API_URI + "/auth/users/reset_password_confirm/",
+        env.API_URI + "/auth/users/reset_password_confirm/",
         {
           method: "POST",
           headers: {
