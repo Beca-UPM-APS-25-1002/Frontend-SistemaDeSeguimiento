@@ -24,7 +24,7 @@ export const actions: Actions = {
       return fail(400, { error: "No has seleccionado ninguna docencia" });
     }
     try {
-      const response = await fetch(env + "/api/enviar-recordatorios/", {
+      const response = await fetch(env.API_URI + "/api/enviar-recordatorios/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
