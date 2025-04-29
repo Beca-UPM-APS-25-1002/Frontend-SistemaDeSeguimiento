@@ -26,7 +26,12 @@
     >
       <label class="input input-bordered w-full validator">
         <Fa icon={faUser}></Fa>
-        <input type="text" required placeholder="Nombre" name="nombre" />
+        <input
+          type="text"
+          required
+          placeholder="Nombre y apellidos"
+          name="nombre"
+        />
       </label>
       <span class="text-error">{errors?.nombre}</span>
 
