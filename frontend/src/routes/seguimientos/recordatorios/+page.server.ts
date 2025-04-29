@@ -1,9 +1,13 @@
 import { getSeguimientosFaltantesMes } from "$lib/APIUtils.js";
-import { fail, type Actions } from "@sveltejs/kit";
+import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "../$types.js";
 import { env } from "$env/dynamic/private";
 
 export const load: LayoutServerLoad = async ({ locals, url, fetch }) => {
+  if (!locals.user?.is_admin) {
+    //Redirect user if not admin
+    throw redirect(302, "/seguimientos");
+  }
   const month =
     Number(url.searchParams.get("month")) || new Date().getMonth() + 1;
   return {
