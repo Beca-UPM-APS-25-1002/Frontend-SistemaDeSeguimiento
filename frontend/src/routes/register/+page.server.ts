@@ -42,7 +42,12 @@ export const actions = {
       return fail(500, { error: { all: "No se pudo conectar al servidor" } });
     }
     //Redirect with email, deletes cookie in case an account was already logged on
-    cookies.delete("authToken", { path: "/" });
+    cookies.delete("authToken", {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
     throw redirect(302, "/?email=" + registerForm.email);
   },
 } satisfies Actions;

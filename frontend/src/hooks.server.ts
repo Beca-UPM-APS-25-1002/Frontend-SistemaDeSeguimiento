@@ -41,9 +41,13 @@ export const handle: Handle = async ({ event, resolve }) => {
       },
     });
     if (userRequest.status != 200) {
-      console.log(userRequest);
       // If user is not found or is not properly authenticated
-      event.cookies.delete("authToken", { path: "/" });
+      event.cookies.delete("authToken", {
+        path: "/",
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+      });
       throw redirect(302, "/?redirectTo=" + event.url.pathname);
     }
     const user: APIUser = await userRequest.json();

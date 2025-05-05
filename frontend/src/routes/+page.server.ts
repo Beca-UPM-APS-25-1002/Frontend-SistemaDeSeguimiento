@@ -60,7 +60,12 @@ export const actions = {
   },
   logout: async ({ cookies, request, url }) => {
     const token = cookies.get("authToken");
-
+    cookies.delete("authToken", {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
     const response = await fetch(`${env.API_URI}/auth/token/logout/`, {
       method: "POST",
       headers: {
@@ -71,7 +76,6 @@ export const actions = {
     if (!response.ok) {
       console.error("Logout error:", response.body);
     }
-    cookies.delete("authToken", { path: "/" });
     throw redirect(303, "/");
   },
 } satisfies Actions;
