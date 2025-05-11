@@ -2,7 +2,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types.js";
 import { env } from "$env/dynamic/private";
 import { type } from "arktype";
-import { formatErrorMessages } from "$lib/errorFormatUtils.js";
+import { formatErrorMessages } from "$lib/utils/errorFormatUtils.js";
 
 const NewPasswordSchema = type({
   uid: "string",

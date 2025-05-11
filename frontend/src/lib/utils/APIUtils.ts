@@ -3,7 +3,7 @@ import type {
   Docencia,
   FetchSvelteKit,
   SeguimientosFaltantesPorMes,
-} from "./interfaces.js";
+} from "../interfaces.js";
 
 /**
  * Returns all missing seguimientos for the current year and user

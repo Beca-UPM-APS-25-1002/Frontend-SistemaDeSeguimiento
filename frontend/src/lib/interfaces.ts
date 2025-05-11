@@ -44,6 +44,7 @@ export interface Seguimiento {
   profesor: Profesor;
   modulo: Modulo;
   grupo: Grupo;
+  temario_completado: number[];
   ultimo_contenido_impartido: string;
   estado: string;
   justificacion_estado: string;

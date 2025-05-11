@@ -1,4 +1,4 @@
-import { getSeguimientosFaltantesMes } from "$lib/APIUtils.js";
+import { getSeguimientosFaltantesMes } from "$lib/utils/APIUtils.js";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "../$types.js";
 import { env } from "$env/dynamic/private";

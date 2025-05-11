@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import { getSeguimientosAPI, getDocenciaAPI } from "$lib/APIUtils.js";
+import { getSeguimientosAPI, getDocenciaAPI } from "$lib/utils/APIUtils.js";
 import type {
   Seguimiento,
   Docencia,
@@ -7,7 +7,7 @@ import type {
 } from "$lib/interfaces.js";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types.js";
-import { compareAcademicMonths } from "$lib/academicMonthUtils.js";
+import { compareAcademicMonths } from "$lib/utils/academicMonthUtils.js";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {

@@ -7,12 +7,12 @@ import type {
 import { type } from "arktype";
 import type { Actions, PageServerLoad } from "./$types.js";
 import { error, fail } from "@sveltejs/kit";
-import { getDocenciaAPI, getSeguimientosAPI } from "$lib/APIUtils.js";
-import { formatErrorMessages } from "$lib/errorFormatUtils.js";
+import { getDocenciaAPI, getSeguimientosAPI } from "$lib/utils/APIUtils.js";
+import { formatErrorMessages } from "$lib/utils/errorFormatUtils.js";
 import {
   isInPastOrCurrentAcademicMonth,
   compareAcademicMonths,
-} from "$lib/academicMonthUtils.js";
+} from "$lib/utils/academicMonthUtils.js";
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
   try {
@@ -155,13 +155,16 @@ const SeguimientoSchema = type({
     .pipe((value) => Number(value))
     .pipe(type("number > 0").pipe(type("number <= 12"))),
   evaluacion: "'PRIMERA'|'TERCERA'|'SEGUNDA'",
+  temario_completado: "string[]",
   temario_actual: "string",
   docencia: "string",
 });
 
 export const actions: Actions = {
   new: async ({ request, fetch }) => {
-    const data = Object.fromEntries((await request.formData()).entries());
+    const data = Object.fromEntries(
+      groupDuplicateKeys((await request.formData()).entries().toArray())
+    );
     const seguimientoData = SeguimientoSchema(data);
     if (seguimientoData instanceof type.errors) {
       // Esto no debería ocurrir
@@ -190,7 +193,10 @@ export const actions: Actions = {
   update: async ({ request, fetch }) => {
     // Update only happens when id exists
 
-    const data = Object.fromEntries((await request.formData()).entries());
+    const data = Object.fromEntries(
+      groupDuplicateKeys((await request.formData()).entries().toArray())
+    );
+    console.log(data);
     const seguimientoData = SeguimientoSchema(data);
 
     if (seguimientoData instanceof type.errors) {
@@ -222,3 +228,32 @@ export const actions: Actions = {
     }
   },
 };
+
+/**
+ * Groups duplicate keys in an array of string entry pairs using Map
+ * @param entries An array of string key-value pairs
+ * @returns A Map with grouped values
+ */
+function groupDuplicateKeys(
+  entries: [string, FormDataEntryValue][]
+): Map<string, FormDataEntryValue | FormDataEntryValue[]> {
+  const result = new Map<string, FormDataEntryValue | FormDataEntryValue[]>();
+
+  for (const [key, value] of entries) {
+    if (!result.has(key)) {
+      // First occurrence of this key
+      result.set(key, value);
+    } else {
+      const existingValue = result.get(key);
+      if (Array.isArray(existingValue)) {
+        // Key already exists as an array, push the new value
+        existingValue.push(value);
+      } else {
+        // Key exists but isn't an array yet, convert to array with both values
+        result.set(key, [existingValue as string, value]);
+      }
+    }
+  }
+
+  return result;
+}

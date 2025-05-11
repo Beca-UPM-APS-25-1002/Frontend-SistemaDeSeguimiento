@@ -13,7 +13,23 @@
   const { data, form } = $props();
   let docenciaId = $derived(Number(page.params.docenciaId));
   let month = $derived(Number(page.params.month));
-  // Gets the current seguimiento tema or the first one
+
+  // Create a set for completed units
+  let completedUnits: number[] = $state([]);
+
+  // Initialize completed units from data if available
+  $effect(() => {
+    console.log(data.seguimientoActual);
+    if (data.seguimientoActual?.temario_completado) {
+      completedUnits = data.seguimientoActual.temario_completado;
+    } else if (data.seguimientoAnterior?.temario_completado) {
+      completedUnits = data.seguimientoAnterior.temario_completado;
+    } else {
+      completedUnits = [];
+    }
+  });
+
+  // Current selected unit for temario_actual
   let selectedTema: UnidadDeTrabajo | undefined = $derived(
     data.unidadesDeTrabajo.find(
       (value) => value.id === data.seguimientoActual?.temario_actual
@@ -24,15 +40,19 @@
       data.unidadesDeTrabajo[0] ||
       undefined
   );
+
   //Variable to bind to the cumple_programacion toggle
   let cumple_programacionValue: boolean | undefined = $derived(
     data.seguimientoActual?.cumple_programacion ?? true
   );
-  // Function to handle clicking on a list item
-  function selectUnit(temaId: number) {
-    selectedTema = data.unidadesDeTrabajo.find((value) => {
-      return value.id === temaId;
-    });
+
+  // Function to handle clicking on a list item for checkboxes
+  function toggleUnit(temaId: number) {
+    if (completedUnits.includes(temaId)) {
+      completedUnits.splice(completedUnits.indexOf(temaId), 1);
+    } else {
+      completedUnits.push(temaId);
+    }
   }
 </script>
 
@@ -79,57 +99,75 @@
       ? data.seguimientoActual.docencia
       : docenciaId}
   />
+
+  <!-- Hidden inputs for completed units -->
+  {#each Array.from(completedUnits) as completedUnitId}
+    <input type="hidden" name="temario_completado" value={completedUnitId} />
+  {/each}
+
   <!-- Container for the entire form with padding to create overall form margins if needed -->
   <div class="w-full flex flex-wrap">
     <!-- First column - use slightly less than half width to accommodate margins -->
     <div class="w-full md:w-[49%] mb-4 md:mb-0">
-      <fieldset
-        class="fieldset w-full border border-base-300 p-4 rounded-box h-full"
-      >
-        <!--Radio to select current unit of work-->
+      <fieldset class="fieldset border border-base-300 p-4 rounded-box h-full">
+        <!--Checkboxes to select completed units of work-->
         <legend class="fieldset-legend">Situación actual de la docencia</legend>
         <legend class="fieldset-legend"
-          >Selecciona la unidad de trabajo que estás impartiendo:</legend
+          >Selecciona las unidades de trabajo que ya has completado:</legend
         >
         <ul class="steps steps-vertical">
-          {#each data.unidadesDeTrabajo as tema, i}
+          {#each data.unidadesDeTrabajo as tema}
             <li
-              class="step {selectedTema &&
-              tema.numero_tema <= selectedTema?.numero_tema
-                ? 'step-primary'
-                : ''} clickable-step transition-all {selectedTema &&
-              selectedTema.id === tema.id
-                ? 'font-bold'
-                : ''}"
+              class="step {completedUnits.includes(tema.id)
+                ? 'step-primary font-bold'
+                : ''} clickable-step transition-all"
             >
-              <!-- Hidden radio button that will be part of the form submission -->
+              <!-- Hidden checkbox that will be part of the form submission -->
               <input
-                type="radio"
-                name="temario_actual"
-                value={tema.id}
-                id={`${tema.id}`}
+                type="checkbox"
+                id={`tema-${tema.id}`}
                 hidden
-                required
-                checked={selectedTema && selectedTema.id === tema.id}
+                value={tema.id}
+                bind:group={completedUnits}
+                name="temario_completado"
+                checked={completedUnits.includes(tema.id)}
               />
 
               <!-- Label that contains the text -->
-              <label for={`${tema.id}`} class="text-lg">
+              <label for={`tema-${tema.id}`} class="text-lg">
                 {tema.titulo}
               </label>
 
               <!-- Invisible overlay to make entire area clickable -->
               <span
                 class="clickable-overlay"
-                onclick={() => selectUnit(tema.id)}
-                onkeydown={(e) => e.key === "Enter" && selectUnit(tema.id)}
+                onclick={() => toggleUnit(tema.id)}
+                onkeydown={(e) => e.key === "Enter" && toggleUnit(tema.id)}
                 tabindex="0"
-                role="radio"
-                aria-checked={selectedTema && selectedTema.id === tema.id}
+                role="checkbox"
+                aria-checked={completedUnits.includes(tema.id)}
               ></span>
             </li>
           {/each}
         </ul>
+
+        <!-- Select for temario_actual -->
+        <legend class="fieldset-legend"
+          >Unidad de trabajo que estás impartiendo actualmente</legend
+        >
+        <select
+          name="temario_actual"
+          class="select select-bordered mt-2"
+          value={selectedTema ? selectedTema.id : ""}
+          required
+        >
+          <option disabled selected value="">Selecciona la unidad actual</option
+          >
+          {#each data.unidadesDeTrabajo as tema}
+            <option value={tema.id}>{tema.titulo}</option>
+          {/each}
+        </select>
+
         <!-- Select current evaluation/trimestre-->
         <legend class="fieldset-legend">Evaluación</legend>
         <select

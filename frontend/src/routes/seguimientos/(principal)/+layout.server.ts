@@ -1,4 +1,7 @@
-import { getDocenciasAPI, getSeguimientosFaltantesAño } from "$lib/APIUtils.js";
+import {
+  getDocenciasAPI,
+  getSeguimientosFaltantesAño,
+} from "$lib/utils/APIUtils.js";
 import type { LayoutServerLoad } from "./$types.ts";
 
 export const load: LayoutServerLoad = async ({ locals, url, fetch }) => {
