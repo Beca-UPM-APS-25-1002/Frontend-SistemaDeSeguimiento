@@ -19,7 +19,6 @@
 
   // Initialize completed units from data if available
   $effect(() => {
-    console.log(data.seguimientoActual);
     if (data.seguimientoActual?.temario_completado) {
       completedUnits = data.seguimientoActual.temario_completado;
     } else if (data.seguimientoAnterior?.temario_completado) {

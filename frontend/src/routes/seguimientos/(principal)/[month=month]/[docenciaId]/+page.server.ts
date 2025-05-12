@@ -155,7 +155,7 @@ const SeguimientoSchema = type({
     .pipe((value) => Number(value))
     .pipe(type("number > 0").pipe(type("number <= 12"))),
   evaluacion: "'PRIMERA'|'TERCERA'|'SEGUNDA'",
-  temario_completado: "string[]",
+  temario_completado: type("string[]").default(() => []),
   temario_actual: "string",
   docencia: "string",
 });
@@ -196,7 +196,6 @@ export const actions: Actions = {
     const data = Object.fromEntries(
       groupDuplicateKeys((await request.formData()).entries().toArray())
     );
-    console.log(data);
     const seguimientoData = SeguimientoSchema(data);
 
     if (seguimientoData instanceof type.errors) {
