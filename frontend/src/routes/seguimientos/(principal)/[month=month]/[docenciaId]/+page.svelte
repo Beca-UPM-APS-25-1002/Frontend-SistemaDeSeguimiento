@@ -114,7 +114,7 @@
         <legend class="fieldset-legend"
           >Selecciona las unidades de trabajo que ya has completado:</legend
         >
-        <ul class="steps steps-vertical">
+        <ul class="steps steps-vertical h-60 overflow-y-auto">
           {#each data.unidadesDeTrabajo as tema}
             <li
               class="step {completedUnits.includes(tema.id)

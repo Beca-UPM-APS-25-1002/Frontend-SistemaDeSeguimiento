@@ -33,7 +33,9 @@
   // Helper function to get unidad de trabajo title by ID
   function getUnidadTitle(id: number) {
     const unidad = unidadesDeTrabajo.find((u) => u.id === id);
-    return unidad ? `${unidad.numero_tema}. ${unidad.titulo}` : "No asignado";
+    return unidad
+      ? `UT${unidad.numero_tema} - ${unidad.titulo}`
+      : "No asignado";
   }
 
   // Function to determine status badge color
@@ -99,7 +101,8 @@
           <tr>
             <th>Mes</th>
             <th>Estado</th>
-            <th>Unidad de Trabajo</th>
+            <th>Unidades de Trabajo completadas</th>
+            <th>Unidad de Trabajo actual</th>
             <th>Último Contenido</th>
             <th>Cumple Programación</th>
             <th>Evaluación</th>
@@ -126,6 +129,14 @@
                       Justificación: {seguimiento.justificacion_estado}
                     </p>
                   {/if}
+                </td>
+                <td>
+                  {#each seguimiento.temario_completado as idTema, i}
+                    {getUnidadTitle(idTema)}
+                    {#if i < seguimiento.temario_completado.length - 1}
+                      <br />
+                    {/if}
+                  {/each}
                 </td>
                 <td>{getUnidadTitle(seguimiento.temario_actual)}</td>
                 <td>
