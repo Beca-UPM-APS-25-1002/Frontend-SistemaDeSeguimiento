@@ -151,6 +151,8 @@ const SeguimientoSchema = type({
     .pipe(type("boolean"))
     .default(""),
   "justificacion_cumple_programacion?": "string",
+  "motivo_no_cumple_programacion?":
+    "'CONTENIDOS'|'SECUENCIA'|'ACTIVIDADES'|'EVALUACION'",
   mes: type("string")
     .pipe((value) => Number(value))
     .pipe(type("number > 0").pipe(type("number <= 12"))),

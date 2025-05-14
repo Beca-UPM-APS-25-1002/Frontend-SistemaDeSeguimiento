@@ -51,6 +51,21 @@
         return "badge-ghost";
     }
   }
+
+  function getMotivo(motivo: string): string {
+    switch (motivo) {
+      case "CONTENIDOS":
+        return "Cambio en los Contenidos";
+      case "SECUENCIA":
+        return "Cambio en la Secuenciación y distribución temporal de las UTs";
+      case "ACTIVIDADES":
+        return "Cambio en actividades";
+      case "EVALUACION":
+        return "Cambio en Evaluación";
+      default:
+        return "Motivo no encontrado";
+    }
+  }
 </script>
 
 {#if docencia}
@@ -155,6 +170,12 @@
                   >
                     {seguimiento.cumple_programacion ? "Sí" : "No"}
                   </div>
+                  {#if seguimiento.motivo_no_cumple_programacion}
+                    <p class="text-sm italic mt-1">
+                      Motivo: {getMotivo(
+                        seguimiento.motivo_no_cumple_programacion
+                      )}
+                    </p>{/if}
                   {#if seguimiento.justificacion_cumple_programacion}
                     <p class="text-sm italic mt-1">
                       Justificación: {seguimiento.justificacion_cumple_programacion}

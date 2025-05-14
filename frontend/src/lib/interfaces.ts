@@ -50,6 +50,7 @@ export interface Seguimiento {
   justificacion_estado: string;
   cumple_programacion: boolean;
   justificacion_cumple_programacion: string;
+  motivo_no_cumple_programacion: string;
   mes: number;
   evaluacion: string;
   temario_actual: number;

@@ -5,17 +5,18 @@
   import {
     faCheckCircle,
     faSave,
+    faWarning,
     faXmarkCircle,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
-  import { slide } from "svelte/transition";
+  import { fly, slide } from "svelte/transition";
 
   const { data, form } = $props();
   let docenciaId = $derived(Number(page.params.docenciaId));
   let month = $derived(Number(page.params.month));
 
   // Create a set for completed units
-  let completedUnits: number[] = $state([]);
+  let completedUnits: number[] = $derived([]);
 
   // Initialize completed units from data if available
   $effect(() => {
@@ -41,8 +42,12 @@
   );
 
   //Variable to bind to the cumple_programacion toggle
-  let cumple_programacionValue: boolean | undefined = $derived(
+  let cumple_programacionValue = $derived(
     data.seguimientoActual?.cumple_programacion ?? true
+  );
+
+  let estadoValue = $derived(
+    data.seguimientoActual ? data.seguimientoActual.estado : ""
   );
 
   // Function to handle clicking on a list item for checkboxes
@@ -105,9 +110,9 @@
   {/each}
 
   <!-- Container for the entire form with padding to create overall form margins if needed -->
-  <div class="w-full flex flex-wrap">
+  <div class="w-full flex flex-wrap transition-all">
     <!-- First column - use slightly less than half width to accommodate margins -->
-    <div class="w-full md:w-[49%] mb-4 md:mb-0">
+    <div class="w-full md:w-[49%] mb-4 md:mb-0 transition-all">
       <fieldset class="fieldset border border-base-300 p-4 rounded-box h-full">
         <!--Checkboxes to select completed units of work-->
         <legend class="fieldset-legend">Situación actual de la docencia</legend>
@@ -206,30 +211,32 @@
         <legend class="fieldset-legend">Estado de la programación</legend>
         <!-- Select status of seguimiento-->
         <legend class="fieldset-legend">Estado actual</legend>
-        <select
-          name="estado"
-          class="select"
-          value={data.seguimientoActual ? data.seguimientoActual.estado : ""}
-          required
-        >
+        <select name="estado" class="select" bind:value={estadoValue} required>
           <option disabled selected value="">Elige el estado actual</option>
           <option value="ATRASADO">Atrasado</option>
           <option value="AL_DIA">Al Día</option>
           <option value="ADELANTADO">Adelantado</option>
         </select>
-        <!--Text area for Ultimo contenido impartido-->
-        <legend class="fieldset-legend">Justificación del estado actual</legend>
-        <textarea
-          name="justificacion_estado"
-          id="justificacion_estado"
-          class="textarea h-24"
-          placeholder={data.seguimientoAnterior?.justificacion_estado
-            ? `En el seguimiento anterior indicaste: ${data.seguimientoAnterior.justificacion_estado}`
-            : "Justificación del estado actual"}
-          >{data.seguimientoActual?.justificacion_estado}</textarea
-        >
-        <label for="justificacion_estado" class="fieldset-label">Opcional</label
-        >
+        {#if estadoValue != "AL_DIA"}
+          <div transition:fly={{ y: -20, duration: 300 }}>
+            <!--Text area for Ultimo contenido impartido-->
+            <legend class="fieldset-legend"
+              >Justificación del estado actual</legend
+            >
+            <textarea
+              name="justificacion_estado"
+              id="justificacion_estado"
+              class="textarea h-24"
+              placeholder={data.seguimientoAnterior?.justificacion_estado
+                ? `En el seguimiento anterior indicaste: ${data.seguimientoAnterior.justificacion_estado}`
+                : "Justificación del estado actual"}
+              required>{data.seguimientoActual?.justificacion_estado}</textarea
+            >
+            <label for="justificacion_estado" class="fieldset-label"
+              >Requerido</label
+            >
+          </div>
+        {/if}
       </fieldset>
 
       <!-- Third fieldset for programming status-->
@@ -243,25 +250,59 @@
           bind:checked={cumple_programacionValue}
           class="checkbox bg-transparent border-neutral checked:bg-primary checked:text-neutral checked:border-neutral"
         />
-
-        <!--Text area for Ultimo contenido impartido-->
-        <legend class="fieldset-legend"
-          >Justificación de que no cumpla la programación</legend
-        >
-        <textarea
-          name="justificacion_cumple_programacion"
-          id="justificacion_cumple_programacion"
-          class="textarea h-24"
-          placeholder={data.seguimientoAnterior
-            ?.justificacion_cumple_programacion
-            ? `En el seguimiento anterior indicaste: ${data.seguimientoAnterior.justificacion_cumple_programacion}`
-            : "Justificación de que no cumpla la programación"}
-          disabled={cumple_programacionValue}
-          >{data.seguimientoActual?.justificacion_cumple_programacion}</textarea
-        >
-        <label for="justificacion_cumple_programacion" class="fieldset-label"
-          >Opcional</label
-        >
+        {#if !cumple_programacionValue}
+          <div transition:fly={{ y: -20, duration: 300 }}>
+            <div class="divider"></div>
+            <p class="alert alert-outline alert-warning">
+              <Fa icon={faWarning}></Fa>
+              Se recuerda que una vez aprobada la programación por el claustro no
+              se pueden realizar cambios en la programación si no están debidamente
+              justificados.
+            </p>
+            <legend class="fieldset-legend">
+              Motivo de que no cumpla la programación
+            </legend>
+            <select
+              name="motivo_no_cumple_programacion"
+              class="select"
+              value={data.seguimientoActual
+                ? data.seguimientoActual.motivo_no_cumple_programacion
+                : ""}
+              required={!cumple_programacionValue}
+            >
+              <option disabled selected value="">Elige el motivo</option>
+              <option value="CONTENIDOS">Cambio en los Contenidos</option>
+              <option value="SECUENCIA"
+                >Cambio en la Secuenciación y distribución temporal de las UTs</option
+              >
+              <option value="ACTIVIDADES">Cambio en Actividades</option>
+              <option value="EVALUACION">Cambio en Evaluación</option>
+            </select>
+            <label for="motivo_no_cumple_programacion" class="fieldset-label"
+              >Requerido</label
+            >
+            <!--Text area for Justificación de que no cumpla la programación-->
+            <legend class="fieldset-legend"
+              >Justificación de que no cumpla la programación</legend
+            >
+            <textarea
+              name="justificacion_cumple_programacion"
+              id="justificacion_cumple_programacion"
+              class="textarea h-24"
+              required={!cumple_programacionValue}
+              placeholder={data.seguimientoAnterior
+                ?.justificacion_cumple_programacion
+                ? `En el seguimiento anterior indicaste: ${data.seguimientoAnterior.justificacion_cumple_programacion}`
+                : "Justificación de que no cumpla la programación"}
+              >{data.seguimientoActual
+                ?.justificacion_cumple_programacion}</textarea
+            >
+            <label
+              for="justificacion_cumple_programacion"
+              class="fieldset-label">Requerido</label
+            >
+          </div>
+        {/if}
       </fieldset>
     </div>
     {#if form?.error}
