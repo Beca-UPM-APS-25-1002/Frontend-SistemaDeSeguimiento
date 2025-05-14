@@ -2,6 +2,7 @@ import { getSeguimientosFaltantesMes } from "$lib/utils/APIUtils.js";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "../$types.js";
 import { env } from "$env/dynamic/private";
+import { formatErrorMessages } from "$lib/utils/errorFormatUtils.js";
 
 export const load: LayoutServerLoad = async ({ locals, url, fetch }) => {
   if (!locals.user?.is_admin) {
@@ -37,7 +38,9 @@ export const actions: Actions = {
       });
       if (!response.ok) {
         console.error(response);
-        return fail(400, { error: "Error al enviar los recordatorios" });
+        return fail(400, {
+          error: formatErrorMessages(await response.json()),
+        });
       }
       return { success: { n_emails: (await response.json()).emails_enviados } };
     } catch (error) {
