@@ -217,7 +217,7 @@
           <option value="AL_DIA">Al Día</option>
           <option value="ADELANTADO">Adelantado</option>
         </select>
-        {#if estadoValue != "AL_DIA"}
+        {#if estadoValue != "" && estadoValue != "AL_DIA"}
           <div transition:fly={{ y: -20, duration: 300 }}>
             <!--Text area for Ultimo contenido impartido-->
             <legend class="fieldset-legend"
