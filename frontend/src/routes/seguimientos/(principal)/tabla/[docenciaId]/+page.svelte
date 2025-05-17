@@ -9,7 +9,7 @@
 
   const { data } = $props();
 
-  const { docencia, seguimientos, unidadesDeTrabajo } = data;
+  const { docencia, seguimientos, unidadesDeTrabajo } = $derived(data);
 
   // Helper function to get month name
   function getMonthName(monthNumber: number) {
@@ -70,7 +70,7 @@
 
 {#if docencia}
   <div class="container mx-auto p-4">
-    <div class="bg-base-200 rounded-lg p-6">
+    <div class="rounded-lg p-6">
       <div class="card bg-base-100 shadow-lg flex-row">
         <div class="card-body">
           <h2 class="card-title">Información del Módulo</h2>
@@ -91,12 +91,6 @@
             <span class="font-semibold">Grupo:</span>
             {docencia.grupo.nombre}
           </p>
-          <div class="mt-6">
-            <button class="btn btn-secondary" onclick={() => history.back()}>
-              <Fa icon={faArrowLeft}></Fa>
-              Volver
-            </button>
-          </div>
         </div>
         <div class="card-body">
           <h2 class="card-title">Unidades De Trabajo</h2>
@@ -146,12 +140,16 @@
                   {/if}
                 </td>
                 <td>
-                  {#each seguimiento.temario_completado as idTema, i}
-                    {getUnidadTitle(idTema)}
-                    {#if i < seguimiento.temario_completado.length - 1}
-                      <br />
-                    {/if}
-                  {/each}
+                  <div class="badge badge-ghost">
+                    {seguimiento.temario_completado.length} / {unidadesDeTrabajo.length}
+                  </div>
+                  <ul>
+                    {#each seguimiento.temario_completado as idTema, i}
+                      <li>
+                        {getUnidadTitle(idTema)}
+                      </li>
+                    {/each}
+                  </ul>
                 </td>
                 <td>{getUnidadTitle(seguimiento.temario_actual)}</td>
                 <td>
