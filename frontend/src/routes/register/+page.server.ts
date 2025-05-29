@@ -35,7 +35,10 @@ export const actions = {
       });
 
       if (!response.ok) {
-        console.error("Content sent back by server:", response);
+        console.error(
+          "Content sent back by server:",
+          await streamToString(response.body?.getReader())
+        );
         return fail(response.status, { error: await response.json() });
       }
     } catch (error) {
@@ -52,3 +55,12 @@ export const actions = {
     throw redirect(302, "/?email=" + registerForm.email);
   },
 } satisfies Actions;
+
+function streamToString(stream: any) {
+  const chunks: any[] = [];
+  return new Promise((resolve, reject) => {
+    stream.on("data", (chunk: any) => chunks.push(Buffer.from(chunk)));
+    stream.on("error", (err: any) => reject(err));
+    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+  });
+}
