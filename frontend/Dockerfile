@@ -8,6 +8,8 @@ RUN npm prune --production
 
 FROM node:22-alpine
 WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y curl wget
 COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY package.json .
