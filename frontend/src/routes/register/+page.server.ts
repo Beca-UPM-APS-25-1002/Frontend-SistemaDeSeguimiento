@@ -39,6 +39,7 @@ export const actions = {
       }
     } catch (error) {
       console.error("Register error:", error);
+      console.error("Content sent back by server:",response);
       return fail(500, { error: { all: "No se pudo conectar al servidor" } });
     }
     //Redirect with email, deletes cookie in case an account was already logged on
