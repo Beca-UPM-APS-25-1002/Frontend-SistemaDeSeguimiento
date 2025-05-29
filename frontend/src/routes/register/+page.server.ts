@@ -35,10 +35,6 @@ export const actions = {
       });
 
       if (!response.ok) {
-        console.error(
-          "Content sent back by server:",
-          await streamToString(response.body)
-        );
         return fail(response.status, { error: await response.json() });
       }
     } catch (error) {
@@ -55,27 +51,3 @@ export const actions = {
     throw redirect(302, "/?email=" + registerForm.email);
   },
 } satisfies Actions;
-
-async function streamToString(
-  stream: ReadableStream<Uint8Array<ArrayBufferLike>> | null
-) {
-  if (!stream) {
-    return "";
-  }
-  const reader = stream.getReader();
-  const textDecoder = new TextDecoder();
-  let result = "";
-
-  async function read() {
-    const { done, value } = await reader.read();
-
-    if (done) {
-      return result;
-    }
-
-    result += textDecoder.decode(value, { stream: true });
-    return read();
-  }
-
-  return read();
-}
