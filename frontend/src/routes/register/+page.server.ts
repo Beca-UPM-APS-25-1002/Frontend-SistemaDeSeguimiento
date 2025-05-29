@@ -37,7 +37,7 @@ export const actions = {
       if (!response.ok) {
         console.error(
           "Content sent back by server:",
-          await streamToString(response.body?.getReader())
+          await streamToString(response.body)
         );
         return fail(response.status, { error: await response.json() });
       }
@@ -56,11 +56,26 @@ export const actions = {
   },
 } satisfies Actions;
 
-function streamToString(stream: any) {
-  const chunks: any[] = [];
-  return new Promise((resolve, reject) => {
-    stream.on("data", (chunk: any) => chunks.push(Buffer.from(chunk)));
-    stream.on("error", (err: any) => reject(err));
-    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-  });
+async function streamToString(
+  stream: ReadableStream<Uint8Array<ArrayBufferLike>> | null
+) {
+  if (!stream) {
+    return "";
+  }
+  const reader = stream.getReader();
+  const textDecoder = new TextDecoder();
+  let result = "";
+
+  async function read() {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      return result;
+    }
+
+    result += textDecoder.decode(value, { stream: true });
+    return read();
+  }
+
+  return read();
 }
