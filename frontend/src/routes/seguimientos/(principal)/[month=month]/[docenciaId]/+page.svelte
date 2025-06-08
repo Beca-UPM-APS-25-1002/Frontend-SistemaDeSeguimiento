@@ -138,7 +138,7 @@
               />
 
               <!-- Label that contains the text -->
-              <label for={`tema-${tema.id}`} class="text-lg">
+              <label for={`tema-${tema.id}`} class="text-lg text-left">
                 {tema.titulo}
               </label>
 
