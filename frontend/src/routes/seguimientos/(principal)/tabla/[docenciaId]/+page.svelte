@@ -130,7 +130,11 @@
               <tr>
                 <td>{getMonthName(seguimiento.mes)}</td>
                 <td>
-                  <div class="badge {getStatusColor(seguimiento.estado)}">
+                  <div
+                    class="badge {getStatusColor(
+                      seguimiento.estado
+                    )} whitespace-nowrap"
+                  >
                     {seguimiento.estado.replace("_", " ")}
                   </div>
                   {#if seguimiento.justificacion_estado}
