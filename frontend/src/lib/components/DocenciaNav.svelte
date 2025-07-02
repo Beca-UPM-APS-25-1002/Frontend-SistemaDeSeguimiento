@@ -17,9 +17,6 @@
 
   // Default to current month
 
-  let selectedMonth = $state(
-    Number(page.params.month) || new Date().getMonth() + 1
-  );
   const {
     docencias,
     seguimientosFaltantes,
@@ -32,6 +29,7 @@
     mesActual: number;
   } = $props();
 
+  let selectedMonth = $derived(mesActual || new Date().getMonth() + 1);
   let searchQuery = $state("");
   let expandedView = $state(false);
   let resolvedDocencias = $state<Docencia[]>([]);
