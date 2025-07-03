@@ -29,6 +29,14 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
     // Fetch temario using the modulo id from docencia
     const temarioResponse = await getTemarioAPI(fetch, docencia.modulo.id);
+    if (temarioResponse.status === 404) {
+      return {
+        seguimientoActual: undefined,
+        seguimientoAnterior: undefined,
+        unidadesDeTrabajo: [],
+        docencia: docencia,
+      };
+    }
     const unidadesDeTrabajo =
       (await temarioResponse.json()) as UnidadDeTrabajo[];
 

@@ -68,7 +68,7 @@
   }
 </script>
 
-{#if docencia}
+{#if docencia && unidadesDeTrabajo.length > 0}
   <div class="container mx-auto p-4">
     <div class="rounded-lg p-6">
       <div class="card bg-base-100 shadow-lg flex-row">
@@ -206,7 +206,7 @@
     </div>
   </div>
 {:else}
-  <h1 class="text-xl alert alert-error m-4 font-semibold">
+  <h1 class="text-lg alert alert-error mt-4">
     <Fa icon={faXmarkCircle}></Fa>
     Error <br />
     ¡No se ha podido cargar esta página!
