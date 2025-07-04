@@ -59,6 +59,7 @@ export const actions = {
     throw redirect(302, url.searchParams.get("redirectTo") ?? "/seguimientos");
   },
   logout: async ({ cookies, request, url }) => {
+    // Mandamos request de logout, lo que borra el token y borramos la cookie
     const token = cookies.get("authToken");
     cookies.delete("authToken", {
       path: "/",

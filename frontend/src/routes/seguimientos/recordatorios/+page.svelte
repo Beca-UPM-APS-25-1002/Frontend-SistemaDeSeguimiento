@@ -32,6 +32,8 @@
   });
 
   let selectedRows = $state<number[]>([]);
+
+  // Miramos aquellos que tienen profesores activos
   let docenciasFiltered = $state<Docencia[]>([]);
   $effect(() => {
     data.seguimientosFaltantes.then((result) => {
@@ -39,7 +41,8 @@
     });
     selectedRows = [];
   });
-  // Selects and deselects all rows
+
+  // Function for the button that selects and deselects all rows
   function selectAll(element: any, seguimientos: Docencia[]) {
     if (element.target.checked) {
       selectedRows = docenciasFiltered.map((item) => item.id);

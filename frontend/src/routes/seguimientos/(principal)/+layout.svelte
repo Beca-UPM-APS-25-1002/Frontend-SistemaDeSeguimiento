@@ -16,6 +16,7 @@
     }
   });
 
+  // Nos quedamos en la misma posición, asi parece más una SPA
   afterNavigate(({ to }) => {
     window.scrollTo(0, scrollPosition);
   });

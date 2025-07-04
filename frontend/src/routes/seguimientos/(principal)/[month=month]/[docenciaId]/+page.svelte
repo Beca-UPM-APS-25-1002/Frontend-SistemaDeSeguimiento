@@ -18,6 +18,8 @@
   // Create a set for completed units
   let completedUnits: number[] = $derived([]);
 
+  // Como resumen, mucho de esto es verificar si existe ya un seguimiento o si tenemos que usar el anterior
+
   // Initialize completed units from data if available
   $effect(() => {
     if (data.seguimientoActual?.temario_completado) {

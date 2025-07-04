@@ -22,6 +22,7 @@ export const load: LayoutServerLoad = async ({ locals, url, fetch }) => {
 
 export const actions: Actions = {
   default: async ({ request, fetch }) => {
+    // Manda el request para mandar mails de recordatorio a todas las docencias seleccionadas
     const data = await request.formData();
     const docencias = data.getAll("docencias");
     const mes = data.get("month_selector");

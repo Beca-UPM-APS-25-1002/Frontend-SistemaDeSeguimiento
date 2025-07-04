@@ -172,7 +172,9 @@ const SeguimientoSchema = type({
 
 export const actions: Actions = {
   new: async ({ request, fetch }) => {
+    // Crea un nuevo seguimiento
     const data = Object.fromEntries(
+      //Usamos group para el temario completado, que sea solo un campo
       groupDuplicateKeys((await request.formData()).entries().toArray())
     );
     const seguimientoData = SeguimientoSchema(data);

@@ -14,4 +14,5 @@ Frontend de la aplicación de seguimiento
 ```py
 API_URI = "http://localhost:8000" #URI del backend para acceso desde el servidor de la app
 BACKEND_PUBLIC_URL = "http://localhost:8000" #URL del backend para acceso desde el cliente
+PUBLIC_NAVBAR_TITLE = "Departamento de xyz IES xyz" # Titúlo que se añade a la página principal de la aplicación
 ```

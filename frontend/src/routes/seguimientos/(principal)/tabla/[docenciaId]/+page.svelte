@@ -11,6 +11,7 @@
 
   const { docencia, seguimientos, unidadesDeTrabajo } = $derived(data);
 
+  // Como resumen, todas estas funciones son para renderizar los campos de manera más humana
   // Helper function to get month name
   function getMonthName(monthNumber: number) {
     const months = [

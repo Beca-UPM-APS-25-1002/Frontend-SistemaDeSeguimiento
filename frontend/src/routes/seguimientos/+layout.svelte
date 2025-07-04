@@ -7,6 +7,7 @@
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import type { LayoutProps } from "./$types.ts";
+  import { PUBLIC_NAVBAR_TITLE } from "$env/static/public";
   let { data, children }: LayoutProps = $props();
 </script>
 
@@ -38,6 +39,10 @@
           <Fa icon={faGear}></Fa>
         </a>
       {/if}
+    </div>
+    <div class="navbar-center text-center">
+      {PUBLIC_NAVBAR_TITLE} <br />
+      Seguimientos del curso {data.year}
     </div>
     <div class="flex-row flex gap-2 navbar-end">
       <p class="text-xs ml-2">Bienvenid@ <br /> {data.user?.nombre}</p>

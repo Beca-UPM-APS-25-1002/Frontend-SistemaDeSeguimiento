@@ -31,11 +31,12 @@
 
   let selectedMonth = $derived(mesActual || new Date().getMonth() + 1);
   let searchQuery = $state("");
-  let expandedView = $state(false);
+  let expandedView = $state(false); // State to check if we need to show the search bar
   let resolvedDocencias = $state<Docencia[]>([]);
   let filteredDocencias = $state<Docencia[]>([]);
 
   docencias.then((result) => {
+    // We sort the docencias
     resolvedDocencias = result.sort((a, b) => {
       // First sort by group name
       const groupNameComparison = a.grupo.nombre.localeCompare(b.grupo.nombre);
@@ -50,7 +51,7 @@
     filteredDocencias = resolvedDocencias;
   });
 
-  // Computed property for filtered docencias
+  // We search the docencias by the search query string
   function queryChange() {
     if (!searchQuery.trim()) {
       filteredDocencias = resolvedDocencias;

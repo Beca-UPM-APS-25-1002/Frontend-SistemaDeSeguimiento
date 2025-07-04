@@ -42,6 +42,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     });
     if (userRequest.status != 200) {
       // If user is not found or is not properly authenticated
+      // We delete the cookie and redirect to login
       event.cookies.delete("authToken", {
         path: "/",
         httpOnly: true,
@@ -77,6 +78,10 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 };
 
+/**
+ * Inserts the authorization token in fetch requests so we don't need to add it to every one
+ * @param fetch the svelte fetch function
+ */
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
   const token = event.cookies.get("authToken");
   if (token && request.url.startsWith(env.API_URI)) {
